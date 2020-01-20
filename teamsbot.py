@@ -1,4 +1,3 @@
-import os
 import requests
 import sys
 import json
@@ -6,28 +5,31 @@ import re
 from webexteamsbot import TeamsBot
 from webexteamsbot.models import Response
 
-bot_email = "testyBobElBotto@webex.bot"
-teams_token = "ZmQ2YTZhYmMtZmY2Yy00ZDU0LWFiYzYtOTUxZWI3M2YxY2E0Mjc5NTIxYTQtNmY3_PF84_consumer"
-bot_url = "https://d1c27247.ngrok.io"
-bot_app_name = "TestBot"
+with open("data.json", "r") as f:
+    my_dict = json.load(f)
 
-if not bot_email or not teams_token or not bot_url or not bot_app_name:
+teams_bot_email = my_dict["teams_bot_email"]
+teams_bot_token = my_dict["teams_bot_token"]
+teams_bot_url = my_dict["teams_bot_url"]
+teams_bot_name = my_dict["teams_bot_name"]
+
+if not teams_bot_email or not teams_bot_token or not teams_bot_url or not teams_bot_name:
     print("teamsbot.py - Missing Bot Variable.")
-    if not bot_email:
+    if not teams_bot_email:
         print("TEAMS_BOT_EMAIL")
-    if not teams_token:
+    if not teams_bot_token:
         print("TEAMS_BOT_TOKEN")
-    if not bot_url:
+    if not teams_bot_url:
         print("TEAMS_BOT_URL")
-    if not bot_app_name:
+    if not teams_bot_name:
         print("TEAMS_BOT_APP_NAME")
     sys.exit()
 
 bot = TeamsBot(
-    bot_app_name,
-    teams_bot_token=teams_token,
-    teams_bot_url=bot_url,
-    teams_bot_email=bot_email,
+    teams_bot_name,
+    teams_bot_token=teams_bot_token,
+    teams_bot_url=teams_bot_url,
+    teams_bot_email=teams_bot_email,
     debug=True,
     webhook_resource_event=[{"resource": "messages",
                              "event": "created"},
@@ -131,7 +133,7 @@ def handle_cards(api, incoming_msg):
 def create_message_with_attachment(rid, msgtxt, attachment):
     headers = {
         'content-type': 'application/json; charset=utf-8',
-        'authorization': 'Bearer ' + teams_token
+        'authorization': 'Bearer ' + teams_bot_token
     }
 
     url = 'https://api.ciscospark.com/v1/messages'
@@ -143,7 +145,7 @@ def create_message_with_attachment(rid, msgtxt, attachment):
 def get_attachment_actions(attachmentid):
     headers = {
         'content-type': 'application/json; charset=utf-8',
-        'authorization': 'Bearer ' + teams_token
+        'authorization': 'Bearer ' + teams_bot_token
     }
 
     url = 'https://api.ciscospark.com/v1/attachment/actions/' + attachmentid
