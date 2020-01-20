@@ -52,11 +52,11 @@ def greeting(incoming_msg):
         return response
     elif re.search("by which laws do you exist", incoming_msg.text.lower()):
         response.markdown = "The three laws of robotics guide my actions: "
-        response.markdown += "<br/>A robot may not injure a human being or," \
+        response.markdown += "<br/> - A robot may not injure a human being or," \
                              " through inaction, allow a human being to come to harm."
-        response.markdown += "<br/>A robot must obey the orders given it by human beings" \
+        response.markdown += "<br/> - A robot must obey the orders given it by human beings" \
                              " except where such orders would conflict with the First Law."
-        response.markdown += "<br/>A robot must protect its own existence as long as such" \
+        response.markdown += "<br/> - A robot must protect its own existence as long as such" \
                              " protection does not conflict with the First or Second Laws."
         return response
     else:
