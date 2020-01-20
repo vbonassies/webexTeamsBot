@@ -48,14 +48,31 @@ def greeting(incoming_msg):
         response.markdown = "I'm fine thank you, I hope you are having a wonderful day! "
         response.markdown += "<br/>See what I can do by asking for **/help**."
         return response
+    elif re.search("by which laws do you exist", incoming_msg.text.lower()):
+        response.markdown = "The three laws of robotics guide my actions: "
+        response.markdown += "<br/>A robot may not injure a human being or," \
+                             " through inaction, allow a human being to come to harm."
+        response.markdown += "<br/>A robot must obey the orders given it by human beings" \
+                             " except where such orders would conflict with the First Law."
+        response.markdown += "<br/>A robot must protect its own existence as long as such" \
+                             " protection does not conflict with the First or Second Laws."
+        return response
     else:
         response.markdown = "Hello {}, I'm a chat bot. ".format(sender.displayName)
         response.markdown += "<br/>See what I can do by asking for **/help**."
         return response
 
 
-def do_something(incomming_msg):
-    return "I did what u said - {}".format(incomming_msg.text)
+def do_something(incoming_msg):
+    return "I did what u said - {}".format(incoming_msg.text)
+
+
+def questions(incoming_msg):
+    response = "I can answer a few questions: "
+    response += "<br/> - How are you?"
+    response += "<br/> - What is the answer to the big question?"
+    response += "<br/> - By which laws do you exist?"
+    return response
 
 
 def show_card(incoming_msg):
@@ -180,10 +197,11 @@ current_time_help += "_Example: **/time GMT**_"
 bot.set_greeting(greeting)
 
 bot.add_command('attachmentActions', '*', handle_cards)
-bot.add_command("/showcard", "show an adaptative card", show_card)
-bot.add_command("/dosomething", "help for do something", do_something)
+bot.add_command("/showcard", "Show an adaptative card", show_card)
+bot.add_command("/dosomething", "Help for do something", do_something)
 bot.add_command("/demo", "Sample that creates a Team message to be returned.", ret_message)
 bot.add_command("/time", current_time_help, current_time)
+bot.add_command("/questions", "List of the questions I can answer", questions)
 
 bot.remove_command("/echo")
 
