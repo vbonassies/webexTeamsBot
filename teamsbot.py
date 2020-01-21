@@ -94,7 +94,8 @@ def show_card(incoming_msg):
                     "text": "This is a sample of the adaptive card system."
                 }]
             }],
-            "actions": [{
+            "actions": [
+                {
                     "type": "Action.Submit",
                     "title": "Create",
                     "data": "add",
@@ -107,6 +108,53 @@ def show_card(incoming_msg):
                     "data": "remove",
                     "style": "destructive",
                     "id": "button2"
+                },
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Set On-Call duty date",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "Input.Date",
+                                "id": "onCallDutyDate"
+                            },
+                            {
+                                "type": "Input.Text",
+                                "id": "commentOnCallDuty",
+                                "placeholder": "Add a comment",
+                                "isMultiline": true
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "OK"
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                    }                
+                },
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Comment",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "Input.Text",
+                                "id": "comment",
+                                "isMultipleline": true,
+                                "placeholder": "Enter your comment"
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "OK"
+                            }
+                        ]
+                    }
                 }
             ],
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
@@ -115,6 +163,59 @@ def show_card(incoming_msg):
     }
     '''
     backupmessage = "This is an example using Adaptive Cards."
+
+    c = create_message_with_attachment(incoming_msg.roomId,
+                                       msgtxt=backupmessage,
+                                       attachment=json.loads(attachment))
+    print(c)
+    return ""
+
+
+def show_list_card(incoming_msg):
+    attachment = '''
+    {
+        "contentType": "application/vnd.microsoft.card.adaptive",
+        "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+          "type": "AdaptiveCard",
+          "version": "1.0",
+          "body": [
+            {
+              "type": "TextBlock",
+              "text": "Pick the priority"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "id": "priority",
+              "style": "compact",
+              "isMultiSelect": false,
+              "value": "1",
+              "choices": [
+                {
+                  "title": "Low",
+                  "value": "1"
+                },
+                {
+                  "title": "Medium",
+                  "value": "2"
+                },
+                {
+                  "title": "High",
+                  "value": "3"
+                }
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": "Action.Submit",
+              "title": "OK"
+            }
+          ]
+        }
+    }
+    '''
+    backupmessage = "This is an example using Adaptive Cards and InputChoice."
 
     c = create_message_with_attachment(incoming_msg.roomId,
                                        msgtxt=backupmessage,
@@ -204,6 +305,7 @@ bot.set_greeting(greeting)
 
 bot.add_command('attachmentActions', '*', handle_cards)
 bot.add_command("/showcard", "Show an adaptative card", show_card)
+bot.add_command("/showlistcard", "Show an adaptative card with input_choice", show_list_card)
 bot.add_command("/dosomething", "Help for do something", do_something)
 bot.add_command("/demo", "Sample that creates a Team message to be returned.", ret_message)
 bot.add_command("/quickmaths", "Do some quick maths. Example: **/quickmaths 1+1**", quickmaths)
