@@ -77,6 +77,10 @@ def questions(incoming_msg):
     return response
 
 
+def quickmaths(incoming_msg):
+    return str(eval(incoming_msg.text.split("/quickmaths ", 1)[1]))
+
+
 def show_card(incoming_msg):
     attachment = '''
     {
@@ -202,6 +206,7 @@ bot.add_command('attachmentActions', '*', handle_cards)
 bot.add_command("/showcard", "Show an adaptative card", show_card)
 bot.add_command("/dosomething", "Help for do something", do_something)
 bot.add_command("/demo", "Sample that creates a Team message to be returned.", ret_message)
+bot.add_command("/quickmaths", "Do some quick maths. Example: **/quickmaths 1+1**", quickmaths)
 bot.add_command("/time", current_time_help, current_time)
 bot.add_command("/questions", "List of the questions I can answer", questions)
 
