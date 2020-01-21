@@ -4,6 +4,7 @@ import json
 import re
 from webexteamsbot import TeamsBot
 from webexteamsbot.models import Response
+from difflib import SequenceMatcher
 
 with open("data.json", "r") as f:
     my_dict = json.load(f)
@@ -38,19 +39,26 @@ bot = TeamsBot(
 )
 
 
+def close_enough(str1, str2):
+    r = SequenceMatcher(a=str1, b=str2)
+    if r.ratio() > 0.85:
+        return True
+
+
+
 def greeting(incoming_msg):
     sender = bot.teams.people.get(incoming_msg.personId)
     response = Response()
 
-    if re.search("what is the answer to the big question", incoming_msg.text.lower()):
+    if close_enough(incoming_msg.text.lower(), "what is the answer to the big question"):
         response.markdown = "42 obviously! "
         response.markdown += "<br/>So long and thank you for all the fish!"
         return response
-    elif re.search("how are you", incoming_msg.text.lower()):
+    elif close_enough(incoming_msg.text.lower(), "how are you"):
         response.markdown = "I'm fine thank you, I hope you are having a wonderful day! "
         response.markdown += "<br/>See what I can do by asking for **/help**."
         return response
-    elif re.search("by which laws do you exist", incoming_msg.text.lower()):
+    elif close_enough(incoming_msg.text.lower(), "by which laws do you exist"):
         response.markdown = "The three laws of robotics guide my actions: "
         response.markdown += "<br/> - A robot may not injure a human being or," \
                              " through inaction, allow a human being to come to harm."
