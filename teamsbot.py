@@ -12,6 +12,18 @@ teams_bot_email = my_dict["teams_bot_email"]
 teams_bot_token = my_dict["teams_bot_token"]
 teams_bot_url = my_dict["teams_bot_url"]
 teams_bot_name = my_dict["teams_bot_name"]
+api_room_info_url = my_dict["api_room_info_url"]
+api_create_room_url = my_dict["api_create_room_url"]
+
+httpHeaders = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + teams_bot_token
+}
+
+queryParams = {
+    "sortBy": "lastactivity",
+    "max": "2"
+}
 
 if not teams_bot_email or not teams_bot_token or not teams_bot_url or not teams_bot_name:
     print("teamsbot.py - Missing Bot Variable.")
@@ -45,6 +57,7 @@ def close_enough(str1, str2):
 
 
 def greeting(incoming_msg):
+    print(incoming_msg.roomId)
     sender = bot.teams.people.get(incoming_msg.personId)
     response = Response()
 
@@ -81,6 +94,23 @@ def questions(incoming_msg):
     response += "<br/> - What is the answer to the big question?"
     response += "<br/> - By which laws do you exist?"
     return response
+
+
+def create_room(incoming_msg):
+    if incoming_msg.text == "/createroom":
+        return "You need to add an email after the command, Ex: **/createroom bob@bob.com****"
+    to_person_email = incoming_msg.text.split("/createroom", 1)[1]
+    body = {
+        "toPersonEmail": to_person_email,
+        "text": "Hello, " + incoming_msg.personEmail + " send his regards"
+    }
+    response = requests.post(url=api_create_room_url, json=body, headers=httpHeaders)
+    return "Room Created"
+
+
+def search_room(incoming_msg):
+    response = requests.get(url=api_room_info_url, headers=httpHeaders, params=queryParams)
+    return "Here are the rooms info you requested: " + response.text
 
 
 def quickmaths(incoming_msg):
@@ -319,6 +349,8 @@ bot.add_command("/demo", "Sample that creates a Team message to be returned.", r
 bot.add_command("/quickmaths", "Do some quick maths. Example: **/quickmaths 1+1**", quickmaths)
 bot.add_command("/time", current_time_help, current_time)
 bot.add_command("/questions", "List of the questions I can answer", questions)
+bot.add_command("/createroom", "Create a new room for a given email, Example: **/createroom bob@bob.com**", create_room)
+bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 
 bot.remove_command("/echo")
 
