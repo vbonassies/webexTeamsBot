@@ -13,7 +13,7 @@ teams_bot_token = my_dict["teams_bot_token"]
 teams_bot_url = my_dict["teams_bot_url"]
 teams_bot_name = my_dict["teams_bot_name"]
 api_room_info_url = "https://api.ciscospark.com/v1/rooms"
-api_create_room_url = "https://api.ciscospark.com/v1/messages"
+api_message_room_url = "https://api.ciscospark.com/v1/messages"
 
 httpHeaders = {
     "Content-Type": "application/json",
@@ -96,16 +96,16 @@ def questions(incoming_msg):
     return response
 
 
-def create_room(incoming_msg):
-    if incoming_msg.text == "/createroom":
-        return "You need to add an email after the command, Ex: **/createroom bob@bob.com****"
-    to_person_email = incoming_msg.text.split("/createroom", 1)[1]
+def message_room(incoming_msg):
+    if incoming_msg.text == "/messageroom":
+        return "You need to add an email after the command, Ex: **/messageroom bob@bob.com****"
+    to_person_email = incoming_msg.text.split("/messageroom", 1)[1]
     body = {
         "toPersonEmail": to_person_email,
         "text": "Hello, " + incoming_msg.personEmail + " send his regards"
     }
-    response = requests.post(url=api_create_room_url, json=body, headers=httpHeaders)
-    return "Room Created"
+    response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
+    return "Message sent"
 
 
 def search_room(incoming_msg):
@@ -349,7 +349,9 @@ bot.add_command("/demo", "Sample that creates a Team message to be returned.", r
 bot.add_command("/quickmaths", "Do some quick maths. Example: **/quickmaths 1+1**", quickmaths)
 bot.add_command("/time", current_time_help, current_time)
 bot.add_command("/questions", "List of the questions I can answer", questions)
-bot.add_command("/createroom", "Create a new room for a given email, Example: **/createroom bob@bob.com**", create_room)
+bot.add_command("/messageroom",
+                "Create a new room for a given email, Example: **/messageroom bob@bob.com**",
+                message_room)
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 
 bot.remove_command("/echo")
