@@ -12,8 +12,8 @@ teams_bot_email = my_dict["teams_bot_email"]
 teams_bot_token = my_dict["teams_bot_token"]
 teams_bot_url = my_dict["teams_bot_url"]
 teams_bot_name = my_dict["teams_bot_name"]
-api_room_info_url = my_dict["api_room_info_url"]
-api_create_room_url = my_dict["api_create_room_url"]
+api_room_info_url = "https://api.ciscospark.com/v1/rooms"
+api_create_room_url = "https://api.ciscospark.com/v1/messages"
 
 httpHeaders = {
     "Content-Type": "application/json",
