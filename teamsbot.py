@@ -108,6 +108,69 @@ def message_room(incoming_msg):
     return "Message sent"
 
 
+def send_request(incoming_msg):
+    if incoming_msg.text == "/sendrequest":
+        return "You need to add an email after the command, Ex: **/sendrequest bob@bob.com****"
+    to_person_email = incoming_msg.text.split("/sendrequest", 1)[1]
+    body = {
+        "toPersonEmail": to_person_email,
+        "text": incoming_msg.personEmail + " want to ask you something"
+    }
+    response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
+    json_data = json.loads(response.text)
+    yes_no(json_data)
+    return "request sent"
+
+
+def yes_no(json_data):
+    attachment = '''
+        {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+              "type": "AdaptiveCard",
+              "version": "1.0",
+              "body": [
+                {
+                  "type": "TextBlock",
+                  "text": "Yes or No"
+                },
+                {
+                  "type": "Input.ChoiceSet",
+                  "id": "choice",
+                  "style": "compact",
+                  "isMultiSelect": false,
+                  "value": "1",
+                  "choices": [
+                    {
+                      "title": "Yes",
+                      "value": "1"
+                    },
+                    {
+                      "title": "No",
+                      "value": "2"
+                    }
+                  ]
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Action.Submit",
+                  "title": "OK"
+                }
+              ]
+            }
+        }
+        '''
+    backupmessage = "This and example of a yes no."
+
+    c = create_message_with_attachment(json_data["roomId"],
+                                       msgtxt=backupmessage,
+                                       attachment=json.loads(attachment))
+    print(c)
+    return ""
+
+
 def search_room(incoming_msg):
     response = requests.get(url=api_room_info_url, headers=httpHeaders, params=queryParams)
     return "Here are the rooms info you requested: " + response.text
@@ -353,6 +416,7 @@ bot.add_command("/messageroom",
                 "Create a new room for a given email, Example: **/messageroom bob@bob.com**",
                 message_room)
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
+bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
 
 bot.remove_command("/echo")
 
