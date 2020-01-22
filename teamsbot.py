@@ -1,7 +1,6 @@
 import requests
 import sys
 import json
-import re
 from webexteamsbot import TeamsBot
 from webexteamsbot.models import Response
 from difflib import SequenceMatcher
@@ -45,7 +44,6 @@ def close_enough(str1, str2):
         return True
 
 
-
 def greeting(incoming_msg):
     sender = bot.teams.people.get(incoming_msg.personId)
     response = Response()
@@ -86,7 +84,9 @@ def questions(incoming_msg):
 
 
 def quickmaths(incoming_msg):
-    return str(eval(incoming_msg.text.split("/quickmaths ", 1)[1]))
+    if incoming_msg.text == "/quickmaths":
+        return "You need to add an operation after the command, Ex: **/quickmaths 1+1**"
+    return str(eval(incoming_msg.text.split("/quickmaths", 1)[1]))
 
 
 def show_card(incoming_msg):
