@@ -131,9 +131,13 @@ def message_room(incoming_msg):
     if incoming_msg.text == "/messageroom":
         return "You need to add an email after the command, Ex: **/messageroom bob@bob.com****"
     to_person_email = incoming_msg.text.split("/messageroom", 1)[1]
+    if "+" not in incoming_msg.personEmail:
+        display_name = get_display_name_from_email(incoming_msg.personEmail)
+    else:
+        display_name = incoming_msg.personEmail
     body = {
         "toPersonEmail": to_person_email,
-        "text": "Hello, " + incoming_msg.personEmail + " send his regards"
+        "text": "Hello, " + display_name + " send his regards"
     }
     requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     return "Message sent"
