@@ -115,9 +115,6 @@ def get_email_from_display_name(incoming_msg):
     # not working ATM, cannot get infos of user with only the display name
     dn = incoming_msg.text.split("/getemail ", 1)[1]
     url = 'https://api.ciscospark.com/v1/people?displayName=' + dn
-    body = {
-        "displayName": dn
-    }
     response = requests.get(url=url, headers=httpHeaders)
     j_res = json.loads(response.text)
     return ""  # j_res["displayName"]
@@ -203,9 +200,9 @@ def yes_no(json_data, sender_email, receiver_email):
         '''
     backupmessage = "This and example of a yes no."
 
-    c = create_message_with_attachment(json_data["roomId"],
-                                       msgtxt=backupmessage,
-                                       attachment=json.loads(attachment))
+    create_message_with_attachment(json_data["roomId"],
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
     return ""
 
 
@@ -303,9 +300,9 @@ def show_card(incoming_msg):
     '''
     backupmessage = "This is an example using Adaptive Cards."
 
-    c = create_message_with_attachment(incoming_msg.roomId,
-                                       msgtxt=backupmessage,
-                                       attachment=json.loads(attachment))
+    create_message_with_attachment(incoming_msg.roomId,
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
     return ""
 
 
@@ -355,9 +352,9 @@ def show_list_card(incoming_msg):
     '''
     backupmessage = "This is an example using Adaptive Cards and InputChoice."
 
-    c = create_message_with_attachment(incoming_msg.roomId,
-                                       msgtxt=backupmessage,
-                                       attachment=json.loads(attachment))
+    create_message_with_attachment(incoming_msg.roomId,
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
     return ""
 
 
@@ -371,7 +368,7 @@ def send_response(sender_email, receiver_email, response):
         "toPersonEmail": sender_email,
         "text": "Hello, " + receiver_display_name + " responded to you request and said: " + response
     }
-    response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
+    requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     return "Response sent"
 
 
