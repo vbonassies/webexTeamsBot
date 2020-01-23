@@ -57,7 +57,6 @@ def close_enough(str1, str2):
 
 
 def greeting(incoming_msg):
-    print(incoming_msg.roomId)
     sender = bot.teams.people.get(incoming_msg.personId)
     response = Response()
 
@@ -112,15 +111,14 @@ def get_display_name(incoming_msg):
 
 
 def get_email_from_display_name(incoming_msg):
+    # ##TODO
+    # not working ATM, cannot get infos of user with only the display name
     dn = incoming_msg.text.split("/getemail ", 1)[1]
     url = 'https://api.ciscospark.com/v1/people?displayName=' + dn
     body = {
         "displayName": dn
     }
     response = requests.get(url=url, headers=httpHeaders)
-    print(response)
-    print(response.status_code)
-    print(response.text)
     j_res = json.loads(response.text)
     return ""  # j_res["displayName"]
 
@@ -208,7 +206,6 @@ def yes_no(json_data, sender_email, receiver_email):
     c = create_message_with_attachment(json_data["roomId"],
                                        msgtxt=backupmessage,
                                        attachment=json.loads(attachment))
-    print(c)
     return ""
 
 
@@ -309,7 +306,6 @@ def show_card(incoming_msg):
     c = create_message_with_attachment(incoming_msg.roomId,
                                        msgtxt=backupmessage,
                                        attachment=json.loads(attachment))
-    print(c)
     return ""
 
 
@@ -362,12 +358,15 @@ def show_list_card(incoming_msg):
     c = create_message_with_attachment(incoming_msg.roomId,
                                        msgtxt=backupmessage,
                                        attachment=json.loads(attachment))
-    print(c)
     return ""
 
 
 def send_response(sender_email, receiver_email, response):
-    receiver_display_name = get_display_name_from_email(receiver_email)
+    receiver_email = receiver_email.replace(" ", "")
+    if "+" not in receiver_email:
+        receiver_display_name = get_display_name_from_email(receiver_email)
+    else:
+        receiver_display_name = receiver_email
     body = {
         "toPersonEmail": sender_email,
         "text": "Hello, " + receiver_display_name + " responded to you request and said: " + response
@@ -386,9 +385,9 @@ def handle_cards(api, incoming_msg):
     if 'sender' in m["inputs"]:
         send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
         return "Your answer was : {}".format(m["inputs"]["choice"])
-    elif 'onCallDutyDate' in m["inputs"] and\
-            m["inputs"]["onCallDutyDate"] != "" and\
-            'commentOnCallDuty' in m["inputs"] and\
+    elif 'onCallDutyDate' in m["inputs"] and \
+            m["inputs"]["onCallDutyDate"] != "" and \
+            'commentOnCallDuty' in m["inputs"] and \
             m["inputs"]["commentOnCallDuty"] != "":
         return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
     elif 'comment' in m["inputs"]:
@@ -416,7 +415,6 @@ def get_attachment_actions(attachmentid):
 
     url = 'https://api.ciscospark.com/v1/attachment/actions/' + attachmentid
     response = requests.get(url, headers=headers)
-    # print(response.json())
     return response.json()
 
 
@@ -467,7 +465,7 @@ bot.set_greeting(greeting)
 
 bot.add_command('attachmentActions', '*', handle_cards)
 bot.add_command("/getmyinfos", "Get your infos", get_my_infos)
-bot.add_command("/getemail", "Get email of user from his displayName", get_email_from_display_name)
+bot.add_command("/getemail", "Get email of user from his displayName **NOT WORKING ATM**", get_email_from_display_name)
 bot.add_command("/showcard", "Show an adaptive card", show_card)
 bot.add_command("/showlistcard", "Show an adaptive card with input_choice", show_list_card)
 bot.add_command("/dosomething", "Help for do something", do_something)
