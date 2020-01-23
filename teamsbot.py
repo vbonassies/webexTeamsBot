@@ -96,6 +96,42 @@ def questions(incoming_msg):
     return response
 
 
+def get_my_infos(incoming_msg):
+    user_id = incoming_msg.personId
+    url = 'https://api.ciscospark.com/v1/people/' + user_id
+    response = requests.get(url=url, headers=httpHeaders)
+    return response.text
+
+
+def get_display_name(incoming_msg):
+    user_id = incoming_msg.personId
+    url = 'https://api.ciscospark.com/v1/people/' + user_id
+    response = requests.get(url=url, headers=httpHeaders)
+    j_res = json.loads(response.text)
+    return j_res["displayName"]
+
+
+def get_email_from_display_name(incoming_msg):
+    dn = incoming_msg.text.split("/getemail ", 1)[1]
+    url = 'https://api.ciscospark.com/v1/people?displayName=' + dn
+    body = {
+        "displayName": dn
+    }
+    response = requests.get(url=url, headers=httpHeaders)
+    print(response)
+    print(response.status_code)
+    print(response.text)
+    j_res = json.loads(response.text)
+    return ""  # j_res["displayName"]
+
+
+def get_display_name_from_email(email):
+    url = 'https://api.ciscospark.com/v1/people?email=' + email
+    response = requests.get(url=url, headers=httpHeaders)
+    j_res = json.loads(response.text)
+    return j_res["items"][0]["displayName"]
+
+
 def message_room(incoming_msg):
     if incoming_msg.text == "/messageroom":
         return "You need to add an email after the command, Ex: **/messageroom bob@bob.com****"
@@ -104,7 +140,7 @@ def message_room(incoming_msg):
         "toPersonEmail": to_person_email,
         "text": "Hello, " + incoming_msg.personEmail + " send his regards"
     }
-    response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
+    requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     return "Message sent"
 
 
@@ -112,9 +148,10 @@ def send_request(incoming_msg):
     if incoming_msg.text == "/sendrequest":
         return "You need to add an email after the command, Ex: **/sendrequest bob@bob.com****"
     to_person_email = incoming_msg.text.split("/sendrequest", 1)[1]
+    dp = get_display_name(incoming_msg)
     body = {
         "toPersonEmail": to_person_email,
-        "text": incoming_msg.personEmail + " want to ask you something"
+        "text": dp + " want to ask you something"
     }
     response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     json_data = json.loads(response.text)
@@ -158,8 +195,8 @@ def yes_no(json_data, sender_email, receiver_email):
                   "type": "Action.Submit",
                   "title": "OK",
                   "data": {
-                    "sender": "'''+sender_email+'''",
-                    "receiver": "'''+receiver_email+'''"
+                    "sender": "''' + sender_email + '''",
+                    "receiver": "''' + receiver_email + '''"
                   }
                 }
               ]
@@ -330,9 +367,10 @@ def show_list_card(incoming_msg):
 
 
 def send_response(sender_email, receiver_email, response):
+    receiver_display_name = get_display_name_from_email(receiver_email)
     body = {
         "toPersonEmail": sender_email,
-        "text": "Hello, " + receiver_email + " as responded to you request and said: " + response
+        "text": "Hello, " + receiver_display_name + " responded to you request and said: " + response
     }
     response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     return "Response sent"
@@ -345,8 +383,17 @@ def handle_cards(api, incoming_msg):
     :return:
     """
     m = get_attachment_actions(incoming_msg["data"]["id"])
-    send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
-    return "card action was : {}".format(m["inputs"]["choice"])
+    if 'sender' in m["inputs"]:
+        send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
+        return "Your answer was : {}".format(m["inputs"]["choice"])
+    elif 'onCallDutyDate' in m["inputs"] and\
+            m["inputs"]["onCallDutyDate"] != "" and\
+            'commentOnCallDuty' in m["inputs"] and\
+            m["inputs"]["commentOnCallDuty"] != "":
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+    elif 'comment' in m["inputs"]:
+        return "Your answer was : {}".format(m["inputs"]["comment"])
+    return "Something went wrong"
 
 
 def create_message_with_attachment(rid, msgtxt, attachment):
@@ -369,7 +416,7 @@ def get_attachment_actions(attachmentid):
 
     url = 'https://api.ciscospark.com/v1/attachment/actions/' + attachmentid
     response = requests.get(url, headers=headers)
-    #print(response.json())
+    # print(response.json())
     return response.json()
 
 
@@ -419,8 +466,10 @@ current_time_help += "_Example: **/time GMT**_"
 bot.set_greeting(greeting)
 
 bot.add_command('attachmentActions', '*', handle_cards)
-bot.add_command("/showcard", "Show an adaptative card", show_card)
-bot.add_command("/showlistcard", "Show an adaptative card with input_choice", show_list_card)
+bot.add_command("/getmyinfos", "Get your infos", get_my_infos)
+bot.add_command("/getemail", "Get email of user from his displayName", get_email_from_display_name)
+bot.add_command("/showcard", "Show an adaptive card", show_card)
+bot.add_command("/showlistcard", "Show an adaptive card with input_choice", show_list_card)
 bot.add_command("/dosomething", "Help for do something", do_something)
 bot.add_command("/demo", "Sample that creates a Team message to be returned.", ret_message)
 bot.add_command("/quickmaths", "Do some quick maths. Example: **/quickmaths 1+1**", quickmaths)
