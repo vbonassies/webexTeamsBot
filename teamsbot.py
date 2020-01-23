@@ -393,6 +393,8 @@ def handle_cards(api, incoming_msg):
         return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
     elif 'comment' in m["inputs"]:
         return "Your answer was : {}".format(m["inputs"]["comment"])
+    elif 'priority' in m["inputs"]:
+        return "Your answer was : {}".format(m["inputs"]["priority"])
     return "Something went wrong"
 
 
