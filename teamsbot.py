@@ -118,11 +118,11 @@ def send_request(incoming_msg):
     }
     response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     json_data = json.loads(response.text)
-    yes_no(json_data)
+    yes_no(json_data, incoming_msg.personEmail, to_person_email)
     return "request sent"
 
 
-def yes_no(json_data):
+def yes_no(json_data, sender_email, receiver_email):
     attachment = '''
         {
             "contentType": "application/vnd.microsoft.card.adaptive",
@@ -144,11 +144,11 @@ def yes_no(json_data):
                   "choices": [
                     {
                       "title": "Yes",
-                      "value": "1"
+                      "value": "Yes"
                     },
                     {
                       "title": "No",
-                      "value": "2"
+                      "value": "No"
                     }
                   ]
                 }
@@ -156,7 +156,11 @@ def yes_no(json_data):
               "actions": [
                 {
                   "type": "Action.Submit",
-                  "title": "OK"
+                  "title": "OK",
+                  "data": {
+                    "sender": "'''+sender_email+'''",
+                    "receiver": "'''+receiver_email+'''"
+                  }
                 }
               ]
             }
@@ -325,6 +329,15 @@ def show_list_card(incoming_msg):
     return ""
 
 
+def send_response(sender_email, receiver_email, response):
+    body = {
+        "toPersonEmail": sender_email,
+        "text": "Hello, " + receiver_email + " as responded to you request and said: " + response
+    }
+    response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
+    return "Response sent"
+
+
 def handle_cards(api, incoming_msg):
     """
     :param api:
@@ -332,8 +345,8 @@ def handle_cards(api, incoming_msg):
     :return:
     """
     m = get_attachment_actions(incoming_msg["data"]["id"])
-
-    return "card action was - {}".format(m["inputs"])
+    send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
+    return "card action was : {}".format(m["inputs"]["choice"])
 
 
 def create_message_with_attachment(rid, msgtxt, attachment):
@@ -356,6 +369,7 @@ def get_attachment_actions(attachmentid):
 
     url = 'https://api.ciscospark.com/v1/attachment/actions/' + attachmentid
     response = requests.get(url, headers=headers)
+    #print(response.json())
     return response.json()
 
 
@@ -413,7 +427,7 @@ bot.add_command("/quickmaths", "Do some quick maths. Example: **/quickmaths 1+1*
 bot.add_command("/time", current_time_help, current_time)
 bot.add_command("/questions", "List of the questions I can answer", questions)
 bot.add_command("/messageroom",
-                "Create a new room for a given email, Example: **/messageroom bob@bob.com**",
+                "Send your regards to a given email, Example: **/messageroom bob@bob.com**",
                 message_room)
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
