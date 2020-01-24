@@ -247,20 +247,6 @@ def show_card(incoming_msg):
             }],
             "actions": [
                 {
-                    "type": "Action.Submit",
-                    "title": "Create",
-                    "data": "add",
-                    "style": "positive",
-                    "id": "button1"
-                },
-                {
-                    "type": "Action.Submit",
-                    "title": "Delete",
-                    "data": "remove",
-                    "style": "destructive",
-                    "id": "button2"
-                },
-                {
                     "type": "Action.ShowCard",
                     "title": "Set On-Call duty date",
                     "card": {
