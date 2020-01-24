@@ -114,11 +114,18 @@ def get_my_infos(incoming_msg):
 
 
 def get_display_name(incoming_msg):
-    user_id = incoming_msg.personId
+    user_id = incoming_msg
     url = 'https://api.ciscospark.com/v1/people/' + user_id
     response = requests.get(url=url, headers=httpHeaders)
     j_res = json.loads(response.text)
     return j_res["displayName"]
+
+
+def get_email_from_id(u_id):
+    url = 'https://api.ciscospark.com/v1/people/' + u_id
+    response = requests.get(url=url, headers=httpHeaders)
+    j_res = json.loads(response.text)
+    return j_res["emails"][0]
 
 
 def get_email_from_display_name(incoming_msg):
@@ -231,20 +238,80 @@ def quickmaths(incoming_msg):
     return str(eval(incoming_msg.text.split("/quickmaths", 1)[1]))
 
 
-def send_request_on_call_duty_change(incoming_msg):
-    if incoming_msg.text == "/changeoncallduty":
-        return "You need to add an email after the command, Ex: **/changeoncallduty bob@bob.com****"
-    to_person_email = incoming_msg.text.split("/changeoncallduty", 1)[1]
+def send_request_change_on_call_duty(sender_email, receiver_email, response_date, response_comment):
+    if response_comment == "":
+        text = get_display_name(sender_email) + " would like to change an the on call duty of the " + response_date
+    else:
+        text = get_display_name(sender_email) + " would like to change an the on call duty of the " +\
+               response_date + " and added the comment: " + response_comment
     body = {
-        "toPersonEmail": to_person_email,
-        "text": get_display_name(incoming_msg) + " would like to change an on call duty with you"
+        "toPersonEmail": receiver_email,
+        "text": text
     }
     json_data = json.loads(requests.post(url=api_message_room_url, json=body, headers=httpHeaders).text)
-    on_call_duty_change_request(json_data, incoming_msg.personEmail, to_person_email)
+    on_call_duty_change_response(json_data, sender_email, receiver_email)
     return "request sent"
 
 
-def on_call_duty_change_request(json_data, sender_email, receiver_email):
+def on_call_duty_change_response(json_data, sender_email, receiver_email):
+    attachment = '''
+            {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.0",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "text": "Yes or No"
+                    },
+                    {
+                      "type": "Input.ChoiceSet",
+                      "id": "onCallDutyChoiceResponse",
+                      "style": "compact",
+                      "isMultiSelect": false,
+                      "value": "1",
+                      "choices": [
+                        {
+                          "title": "Yes",
+                          "value": "Yes"
+                        },
+                        {
+                          "title": "No",
+                          "value": "No"
+                        }
+                      ]
+                    },
+                    {
+                        "type": "Input.Text",
+                        "id": "comment",
+                        "placeholder": "Add a comment",
+                        "isMultiline": true
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "Action.Submit",
+                      "title": "OK",
+                      "data": {
+                        "sender": "''' + sender_email + '''",
+                        "receiver": "''' + receiver_email + '''"
+                      }
+                    }
+                  ]
+                }
+            }
+            '''
+    backupmessage = "This and example of a yes no."
+
+    create_message_with_attachment(json_data["roomId"],
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
+    return ""
+
+
+def on_call_duty_change_request(incoming_msg):
     attachment = '''
     {
         "contentType": "application/vnd.microsoft.card.adaptive",
@@ -265,6 +332,12 @@ def on_call_duty_change_request(json_data, sender_email, receiver_email):
                         "type": "AdaptiveCard",
                         "body": [
                             {
+                                "type": "Input.Text",
+                                "id": "receiver",
+                                "placeholder": "Email of the receiver",
+                                "isMultiline": true
+                            },
+                            {
                                 "type": "Input.Date",
                                 "id": "onCallDutyDate"
                             },
@@ -280,8 +353,7 @@ def on_call_duty_change_request(json_data, sender_email, receiver_email):
                                 "type": "Action.Submit",
                                 "title": "OK",
                                 "data": {
-                                    "sender": "''' + sender_email + '''",
-                                    "receiver": "''' + receiver_email + '''"
+                                    "sender": "''' + incoming_msg.personId + '''"
                                 }
                             }
                         ],
@@ -294,9 +366,9 @@ def on_call_duty_change_request(json_data, sender_email, receiver_email):
         }
     }
     '''
-    backupmessage = "On call duty change example."
+    backupmessage = "On call duty change request example."
 
-    create_message_with_attachment(json_data["roomId"],
+    create_message_with_attachment(incoming_msg.roomId,
                                    msgtxt=backupmessage,
                                    attachment=json.loads(attachment))
     return ""
@@ -448,15 +520,21 @@ def send_response(sender_email, receiver_email, response):
     return "Response sent"
 
 
-def send_response_change_on_call_duty(sender_email, receiver_email, response_date, response_comment):
+def send_response_change_on_call_duty(sender_email, receiver_email, response_choice, response_comment):
+    sender_email = get_email_from_id(sender_email)
+    print(sender_email)
     receiver_display_name = format_email(receiver_email)
+    if response_comment == "":
+        text = "Hello, " + receiver_display_name + " has answered to your change request with : " + response_choice
+    else:
+        text = "Hello, " + receiver_display_name + " has answered to your change request with : " + \
+               response_choice + " - he/she commented: " + response_comment
     body = {
         "toPersonEmail": sender_email,
-        "text": "Hello, " + receiver_display_name + " would like to change the on call duty of : " +
-                response_date + " - he/she commented: " + response_comment
+        "text": text
     }
     requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
-    return "Response sent"
+    return ""
 
 
 def handle_cards(api, incoming_msg):
@@ -466,22 +544,41 @@ def handle_cards(api, incoming_msg):
     :return:
     """
     m = get_attachment_actions(incoming_msg["data"]["id"])
+    # BASIC YES NO
     if 'sender' in m["inputs"] and 'choice' in m["inputs"]:
         send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
-        return "1Your answer was : {}".format(m["inputs"]["choice"])
+        return "Your answer was : {}".format(m["inputs"]["choice"])
+
+    # CHANGE REQUEST
     elif 'sender' in m["inputs"] and 'onCallDutyDate' in m["inputs"]:
+        if m["inputs"]["onCallDutyDate"] == "":
+            return "Please enter a date before submitting"
+        if m["inputs"]["receiver"] == "":
+            return "Please enter an email before submitting"
+        send_request_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
+                                         m["inputs"]["onCallDutyDate"], m["inputs"]["comment"])
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + "  " + m["inputs"]["comment"]
+
+    # CHANGE REQUEST RESPONSE
+    elif 'onCallDutyChoiceResponse' in m["inputs"]:
         send_response_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
-                                          m["inputs"]["onCallDutyDate"], m["inputs"]["comment"])
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["comment"]
+                                          m["inputs"]["onCallDutyChoiceResponse"], m["inputs"]["comment"])
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyChoiceResponse"]) + " " + m["inputs"]["comment"]
+
+    # CARD
     elif 'onCallDutyDate' in m["inputs"] and \
             m["inputs"]["onCallDutyDate"] != "" and \
             'commentOnCallDuty' in m["inputs"] and \
             m["inputs"]["commentOnCallDuty"] != "":
-        return "2Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+
+    # CARD
     elif 'comment' in m["inputs"]:
-        return "3Your answer was : {}".format(m["inputs"]["comment"])
+        return "Your answer was : {}".format(m["inputs"]["comment"])
+    # CARD LIST
     elif 'priority' in m["inputs"]:
-        return "4Your answer was : {}".format(m["inputs"]["priority"])
+        return "Your answer was : {}".format(m["inputs"]["priority"])
+
     return "Something went wrong"
 
 
@@ -568,9 +665,7 @@ bot.add_command("/messageroom",
                 message_room)
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
-bot.add_command("/changeoncallduty",
-                "Send a Yes or No card to a user, Example: **/changeoncallduty bob@bob.com**",
-                send_request_on_call_duty_change)
+bot.add_command("/changeoncallduty", "Change an on call duty date", on_call_duty_change_request)
 
 bot.remove_command("/echo")
 
