@@ -99,7 +99,27 @@ def get_my_infos(incoming_msg):
     user_id = incoming_msg.personId
     url = 'https://api.ciscospark.com/v1/people/' + user_id
     response = requests.get(url=url, headers=httpHeaders)
-    return response.text
+    j_res = json.loads(response.text)
+    my_id = j_res["id"]
+    email = j_res["emails"][0]
+    display_name = j_res["displayName"]
+    nickname = j_res["nickName"]
+    first_name = j_res["firstName"]
+    last_name = j_res["lastName"]
+    org_id = j_res["orgId"]
+    status = j_res["status"]
+    my_type = j_res["type"]
+    res = "Here are your infos: " +\
+          "<br>**- Id:** " + my_id +\
+          "<br>**- Email:** " + email +\
+          "<br>**- DisplayName:** " + display_name +\
+          "<br>**- NickName:** " + nickname +\
+          "<br>**- FirstName:** " + first_name +\
+          "<br>**- LastName:** " + last_name +\
+          "<br>**- OrgId:** " + org_id +\
+          "<br>**- Status:** " + status +\
+          "<br>**- Type:** " + my_type
+    return res
 
 
 def get_display_name(incoming_msg):
