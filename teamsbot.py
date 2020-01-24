@@ -100,15 +100,15 @@ def get_my_infos(incoming_msg):
     url = 'https://api.ciscospark.com/v1/people/' + user_id
     response = requests.get(url=url, headers=httpHeaders)
     j_res = json.loads(response.text)
-    res = "Here are your infos: " +\
-          "<br>**- Id:** " + j_res["id"] +\
-          "<br>**- Email:** " + j_res["emails"][0] +\
-          "<br>**- DisplayName:** " + j_res["displayName"] +\
-          "<br>**- NickName:** " + j_res["nickName"] +\
-          "<br>**- FirstName:** " + j_res["firstName"] +\
-          "<br>**- LastName:** " + j_res["lastName"] +\
-          "<br>**- OrgId:** " + j_res["orgId"] +\
-          "<br>**- Status:** " + j_res["status"] +\
+    res = "Here are your infos: " + \
+          "<br>**- Id:** " + j_res["id"] + \
+          "<br>**- Email:** " + j_res["emails"][0] + \
+          "<br>**- DisplayName:** " + j_res["displayName"] + \
+          "<br>**- NickName:** " + j_res["nickName"] + \
+          "<br>**- FirstName:** " + j_res["firstName"] + \
+          "<br>**- LastName:** " + j_res["lastName"] + \
+          "<br>**- OrgId:** " + j_res["orgId"] + \
+          "<br>**- Status:** " + j_res["status"] + \
           "<br>**- Type:** " + j_res["type"]
     return res
 
@@ -158,10 +158,9 @@ def send_request(incoming_msg):
     if incoming_msg.text == "/sendrequest":
         return "You need to add an email after the command, Ex: **/sendrequest bob@bob.com****"
     to_person_email = incoming_msg.text.split("/sendrequest", 1)[1]
-    dp = get_display_name(incoming_msg)
     body = {
         "toPersonEmail": to_person_email,
-        "text": dp + " want to ask you something"
+        "text": get_display_name(incoming_msg) + " want to ask you something"
     }
     response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     json_data = json.loads(response.text)
@@ -230,6 +229,77 @@ def quickmaths(incoming_msg):
     if incoming_msg.text == "/quickmaths":
         return "You need to add an operation after the command, Ex: **/quickmaths 1+1**"
     return str(eval(incoming_msg.text.split("/quickmaths", 1)[1]))
+
+
+def send_request_on_call_duty_change(incoming_msg):
+    if incoming_msg.text == "/changeoncallduty":
+        return "You need to add an email after the command, Ex: **/changeoncallduty bob@bob.com****"
+    to_person_email = incoming_msg.text.split("/changeoncallduty", 1)[1]
+    body = {
+        "toPersonEmail": to_person_email,
+        "text": get_display_name(incoming_msg) + " would like to change an on call duty with you"
+    }
+    json_data = json.loads(requests.post(url=api_message_room_url, json=body, headers=httpHeaders).text)
+    on_call_duty_change_request(json_data, incoming_msg.personEmail, to_person_email)
+    return "request sent"
+
+
+def on_call_duty_change_request(json_data, sender_email, receiver_email):
+    attachment = '''
+    {
+        "contentType": "application/vnd.microsoft.card.adaptive",
+        "content": {
+            "type": "AdaptiveCard",
+            "body": [{
+                "type": "Container",
+                "items": [{
+                    "type": "TextBlock",
+                    "text": "On Call duty change request."
+                }]
+            }],
+            "actions": [
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Pick the date you would like to change your on call duty",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "Input.Date",
+                                "id": "onCallDutyDate"
+                            },
+                            {
+                                "type": "Input.Text",
+                                "id": "comment",
+                                "placeholder": "Add a comment",
+                                "isMultiline": true
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "OK",
+                                "data": {
+                                    "sender": "''' + sender_email + '''",
+                                    "receiver": "''' + receiver_email + '''"
+                                }
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                    }                
+                }
+            ],
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.0"
+        }
+    }
+    '''
+    backupmessage = "On call duty change example."
+
+    create_message_with_attachment(json_data["roomId"],
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
+    return ""
 
 
 def show_card(incoming_msg):
@@ -359,15 +429,31 @@ def show_list_card(incoming_msg):
     return ""
 
 
-def send_response(sender_email, receiver_email, response):
-    receiver_email = receiver_email.replace(" ", "")
-    if "+" not in receiver_email:
-        receiver_display_name = get_display_name_from_email(receiver_email)
+def format_email(email):
+    email = email.replace(" ", "")
+    if "+" not in email:
+        email = get_display_name_from_email(email)
     else:
-        receiver_display_name = receiver_email
+        email = email
+    return email
+
+
+def send_response(sender_email, receiver_email, response):
+    receiver_display_name = format_email(receiver_email)
     body = {
         "toPersonEmail": sender_email,
         "text": "Hello, " + receiver_display_name + " responded to you request and said: " + response
+    }
+    requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
+    return "Response sent"
+
+
+def send_response_change_on_call_duty(sender_email, receiver_email, response_date, response_comment):
+    receiver_display_name = format_email(receiver_email)
+    body = {
+        "toPersonEmail": sender_email,
+        "text": "Hello, " + receiver_display_name + " would like to change the on call duty of : " +
+                response_date + " - he/she commented: " + response_comment
     }
     requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     return "Response sent"
@@ -380,18 +466,22 @@ def handle_cards(api, incoming_msg):
     :return:
     """
     m = get_attachment_actions(incoming_msg["data"]["id"])
-    if 'sender' in m["inputs"]:
+    if 'sender' in m["inputs"] and 'choice' in m["inputs"]:
         send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
-        return "Your answer was : {}".format(m["inputs"]["choice"])
+        return "1Your answer was : {}".format(m["inputs"]["choice"])
+    elif 'sender' in m["inputs"] and 'onCallDutyDate' in m["inputs"]:
+        send_response_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
+                                          m["inputs"]["onCallDutyDate"], m["inputs"]["comment"])
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["comment"]
     elif 'onCallDutyDate' in m["inputs"] and \
             m["inputs"]["onCallDutyDate"] != "" and \
             'commentOnCallDuty' in m["inputs"] and \
             m["inputs"]["commentOnCallDuty"] != "":
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+        return "2Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
     elif 'comment' in m["inputs"]:
-        return "Your answer was : {}".format(m["inputs"]["comment"])
+        return "3Your answer was : {}".format(m["inputs"]["comment"])
     elif 'priority' in m["inputs"]:
-        return "Your answer was : {}".format(m["inputs"]["priority"])
+        return "4Your answer was : {}".format(m["inputs"]["priority"])
     return "Something went wrong"
 
 
@@ -478,6 +568,9 @@ bot.add_command("/messageroom",
                 message_room)
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
+bot.add_command("/changeoncallduty",
+                "Send a Yes or No card to a user, Example: **/changeoncallduty bob@bob.com**",
+                send_request_on_call_duty_change)
 
 bot.remove_command("/echo")
 
