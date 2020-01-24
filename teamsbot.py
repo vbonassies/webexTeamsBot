@@ -100,25 +100,16 @@ def get_my_infos(incoming_msg):
     url = 'https://api.ciscospark.com/v1/people/' + user_id
     response = requests.get(url=url, headers=httpHeaders)
     j_res = json.loads(response.text)
-    my_id = j_res["id"]
-    email = j_res["emails"][0]
-    display_name = j_res["displayName"]
-    nickname = j_res["nickName"]
-    first_name = j_res["firstName"]
-    last_name = j_res["lastName"]
-    org_id = j_res["orgId"]
-    status = j_res["status"]
-    my_type = j_res["type"]
     res = "Here are your infos: " +\
-          "<br>**- Id:** " + my_id +\
-          "<br>**- Email:** " + email +\
-          "<br>**- DisplayName:** " + display_name +\
-          "<br>**- NickName:** " + nickname +\
-          "<br>**- FirstName:** " + first_name +\
-          "<br>**- LastName:** " + last_name +\
-          "<br>**- OrgId:** " + org_id +\
-          "<br>**- Status:** " + status +\
-          "<br>**- Type:** " + my_type
+          "<br>**- Id:** " + j_res["id"] +\
+          "<br>**- Email:** " + j_res["emails"][0] +\
+          "<br>**- DisplayName:** " + j_res["displayName"] +\
+          "<br>**- NickName:** " + j_res["nickName"] +\
+          "<br>**- FirstName:** " + j_res["firstName"] +\
+          "<br>**- LastName:** " + j_res["lastName"] +\
+          "<br>**- OrgId:** " + j_res["orgId"] +\
+          "<br>**- Status:** " + j_res["status"] +\
+          "<br>**- Type:** " + j_res["type"]
     return res
 
 
