@@ -2,13 +2,16 @@ from datetime import date, datetime
 
 
 def check_date_with_today(a_date):
-    today = date.today().strftime("%d-%m-%Y")
+    a_date = datetime.strptime(a_date, "%d-%m-%Y")
+    today = datetime.today()
     if a_date > today:
         return True
     return False
 
 
 def check_two_dates(f_date, s_date):
+    f_date = datetime.strptime(f_date, "%d-%m-%Y")
+    s_date = datetime.strptime(s_date, "%d-%m-%Y")
     if s_date > f_date:
         return True
     return False
@@ -28,3 +31,8 @@ def reformat_date(d):
     d = datetime.strptime(d, '%Y-%m-%d')
     d = d.strftime("%d-%m-%Y")
     return str(d)
+
+
+def get_today_date():
+    today = date.today().strftime("%Y-%m-%d")
+    return today

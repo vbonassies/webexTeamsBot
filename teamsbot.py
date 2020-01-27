@@ -330,7 +330,7 @@ def on_call_duty_change_request(incoming_msg):
             "actions": [
                 {
                     "type": "Action.ShowCard",
-                    "title": "Pick the date you would like to change your on call duty",
+                    "title": "Please fill this form to request your on call duty change",
                     "card": {
                         "type": "AdaptiveCard",
                         "body": [
@@ -545,7 +545,6 @@ def send_response(sender_email, receiver_email, response):
 
 def send_response_change_on_call_duty(sender_email, receiver_email, response_choice, response_comment):
     sender_email = get_email_from_id(sender_email)
-    print(sender_email)
     receiver_display_name = format_email(receiver_email)
     if response_comment == "":
         text = "Hello, " + receiver_display_name + " has answered to your change request with : " + response_choice
@@ -581,7 +580,7 @@ def handle_cards(api, incoming_msg):
         s_date = str_to_date(m["inputs"]["onCallDutyStartDate"])
         e_date = str_to_date(m["inputs"]["onCallDutyEndDate"])
         if not check_date_with_today(s_date):
-            return "The starting date cannot be prior as today"
+            return "The starting date cannot be prior to today"
         if not check_two_dates(s_date, e_date):
             return "The on call duty end date must be later than the start date"
         send_request_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
