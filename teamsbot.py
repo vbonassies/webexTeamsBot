@@ -166,9 +166,13 @@ def send_request(incoming_msg):
     if incoming_msg.text == "/sendrequest":
         return "You need to add an email after the command, Ex: **/sendrequest bob@bob.com****"
     to_person_email = incoming_msg.text.split("/sendrequest", 1)[1]
+    if "+" not in incoming_msg.personEmail:
+        display_name = get_display_name_from_email(incoming_msg.personEmail)
+    else:
+        display_name = incoming_msg.personEmail
     body = {
         "toPersonEmail": to_person_email,
-        "text": get_display_name(incoming_msg) + " want to ask you something"
+        "text": display_name + " want to ask you something"
     }
     response = requests.post(url=api_message_room_url, json=body, headers=httpHeaders)
     json_data = json.loads(response.text)
