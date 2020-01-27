@@ -238,12 +238,14 @@ def quickmaths(incoming_msg):
     return str(eval(incoming_msg.text.split("/quickmaths", 1)[1]))
 
 
-def send_request_change_on_call_duty(sender_email, receiver_email, response_date, response_comment):
+def send_request_change_on_call_duty(sender_email, receiver_email, response_start_date, response_end_date,
+                                     response_comment):
     if response_comment == "":
-        text = get_display_name(sender_email) + " would like to change an the on call duty of the " + response_date
+        text = get_display_name(sender_email) + " would like to change the on call duty from the " \
+               + response_start_date + " to the " + response_end_date
     else:
-        text = get_display_name(sender_email) + " would like to change an the on call duty of the " +\
-               response_date + " and added the comment: " + response_comment
+        text = get_display_name(sender_email) + " would like to change the on call duty from the " \
+               + response_start_date + " to the " + response_end_date + " and added the comment: " + response_comment
     body = {
         "toPersonEmail": receiver_email,
         "text": text
@@ -331,6 +333,10 @@ def on_call_duty_change_request(incoming_msg):
                     "card": {
                         "type": "AdaptiveCard",
                         "body": [
+                             {
+                                "type": "TextBlock",
+                                "text": "Receiver email: "
+                            },
                             {
                                 "type": "Input.Text",
                                 "id": "receiver",
@@ -338,8 +344,24 @@ def on_call_duty_change_request(incoming_msg):
                                 "isMultiline": true
                             },
                             {
+                                "type": "TextBlock",
+                                "text": "Start Date: "
+                            },
+                            {
                                 "type": "Input.Date",
-                                "id": "onCallDutyDate"
+                                "id": "onCallDutyStartDate"
+                            },
+                             {
+                                "type": "TextBlock",
+                                "text": "End Date: "
+                            },
+                            {
+                                "type": "Input.Date",
+                                "id": "onCallDutyEndDate"
+                            },
+                             {
+                                "type": "TextBlock",
+                                "text": "Comment (optional): "
                             },
                             {
                                 "type": "Input.Text",
@@ -528,7 +550,7 @@ def send_response_change_on_call_duty(sender_email, receiver_email, response_cho
         text = "Hello, " + receiver_display_name + " has answered to your change request with : " + response_choice
     else:
         text = "Hello, " + receiver_display_name + " has answered to your change request with : " + \
-               response_choice + " - he/she commented: " + response_comment
+               response_choice + " and commented: " + response_comment
     body = {
         "toPersonEmail": sender_email,
         "text": text
@@ -550,14 +572,16 @@ def handle_cards(api, incoming_msg):
         return "Your answer was : {}".format(m["inputs"]["choice"])
 
     # CHANGE REQUEST
-    elif 'sender' in m["inputs"] and 'onCallDutyDate' in m["inputs"]:
-        if m["inputs"]["onCallDutyDate"] == "":
+    elif 'sender' in m["inputs"] and 'onCallDutyStartDate' in m["inputs"]:
+        if m["inputs"]["onCallDutyStartDate"] == "" or m["inputs"]["onCallDutyEndDate"] == "":
             return "Please enter a date before submitting"
         if m["inputs"]["receiver"] == "":
             return "Please enter an email before submitting"
         send_request_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
-                                         m["inputs"]["onCallDutyDate"], m["inputs"]["comment"])
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + "  " + m["inputs"]["comment"]
+                                         m["inputs"]["onCallDutyStartDate"], m["inputs"]["onCallDutyEndDate"],
+                                         m["inputs"]["comment"])
+        return "Your request is : {}".format(m["inputs"]["onCallDutyStartDate"]) + " " \
+               + m["inputs"]["onCallDutyEndDate"] + "  " + m["inputs"]["comment"]
 
     # CHANGE REQUEST RESPONSE
     elif 'onCallDutyChoiceResponse' in m["inputs"]:
@@ -570,7 +594,7 @@ def handle_cards(api, incoming_msg):
             m["inputs"]["onCallDutyDate"] != "" and \
             'commentOnCallDuty' in m["inputs"] and \
             m["inputs"]["commentOnCallDuty"] != "":
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+        return "Your answer was3 : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
 
     # CARD
     elif 'comment' in m["inputs"]:
