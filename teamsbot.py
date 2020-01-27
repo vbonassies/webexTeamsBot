@@ -580,7 +580,7 @@ def handle_cards(api, incoming_msg):
         s_date = str_to_date(m["inputs"]["onCallDutyStartDate"])
         e_date = str_to_date(m["inputs"]["onCallDutyEndDate"])
         if not check_date_with_today(s_date):
-            return "The starting date cannot be prior to today"
+            return "The starting date cannot be or be prior to today"
         if not check_two_dates(s_date, e_date):
             return "The on call duty end date must be later than the start date"
         send_request_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
