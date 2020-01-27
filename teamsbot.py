@@ -1,6 +1,7 @@
 import requests
 import sys
 import json
+from check import *
 from webexteamsbot import TeamsBot
 from webexteamsbot.models import Response
 from difflib import SequenceMatcher
@@ -577,11 +578,17 @@ def handle_cards(api, incoming_msg):
             return "Please enter a date before submitting"
         if m["inputs"]["receiver"] == "":
             return "Please enter an email before submitting"
+        s_date = str_to_date(m["inputs"]["onCallDutyStartDate"])
+        e_date = str_to_date(m["inputs"]["onCallDutyEndDate"])
+        if not check_date_with_today(s_date):
+            return "The starting date cannot be prior as today"
+        if not check_two_dates(s_date, e_date):
+            return "The on call duty end date must be later than the start date"
         send_request_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
-                                         m["inputs"]["onCallDutyStartDate"], m["inputs"]["onCallDutyEndDate"],
+                                         s_date, e_date,
                                          m["inputs"]["comment"])
-        return "Your request is : {}".format(m["inputs"]["onCallDutyStartDate"]) + " " \
-               + m["inputs"]["onCallDutyEndDate"] + "  " + m["inputs"]["comment"]
+        return "Your request is : {}".format(s_date) + " " \
+               + e_date + "  " + m["inputs"]["comment"]
 
     # CHANGE REQUEST RESPONSE
     elif 'onCallDutyChoiceResponse' in m["inputs"]:
