@@ -9,6 +9,7 @@ __pycache__/
 # Files
 teams_bot/data.json
 calendar/credentials.json
+calendar/tests/*
 
 # Distribution / packaging
 .Python

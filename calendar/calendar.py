@@ -72,12 +72,12 @@ def list_events():
     return events
 
 
-def create_event():
+def create_event(start_d, number_days):
     service = get_calendar_service()
-    d = datetime.now().date()
-    tomorrow = datetime(d.year, d.month, d.day, 10) + timedelta(days=1)
-    start = tomorrow.isoformat()
-    end = (tomorrow + timedelta(hours=144)).isoformat()
+    start_d = datetime.strptime(start_d, "%Y-%m-%d %H:%M:%S")
+    start = start_d.isoformat()
+    h = 24 * number_days
+    end = (start_d + timedelta(hours=h)).isoformat()
 
     event_result = service.events().insert(calendarId="primary",
                                            body={
@@ -89,20 +89,20 @@ def create_event():
     return event_result
 
 
-def update_event(c_id):
+def update_event(c_id, summary, desc, s, e):
     service = get_calendar_service()
 
-    d = datetime.now().date()
-    tomorrow = datetime(d.year, d.month, d.day, 9) + timedelta(days=1)
-    start = tomorrow.isoformat()
-    end = (tomorrow + timedelta(hours=120)).isoformat()
+    s = datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+    start = s.isoformat()
+    e = datetime.strptime(e, "%Y-%m-%d %H:%M:%S")
+    end = e.isoformat()
 
     event_result = service.events().update(
         calendarId="primary",
         eventId=c_id,
         body={
-            "summary": "Updated automating calendar",
-            "description": "update test",
+            "summary": summary,
+            "description": desc,
             "start": {"dateTime": start, "timeZone": "Europe/Paris"},
             "end": {"dateTime": end, "timeZone": "Europe/Paris"},
         }
