@@ -14,3 +14,7 @@ To configure your variables to link your bot to your webhook,
   "teams_bot_name": "you_bot_name"<br>
 }
 
+
+To use he calendar google API, you need a json file with
+your credentials, to do so, follow he step 1 on this:
+https://developers.google.com/calendar/quickstart/python
