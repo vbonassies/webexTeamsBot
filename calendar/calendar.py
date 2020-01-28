@@ -72,7 +72,7 @@ def list_events():
     return events
 
 
-def create_event(start_d, number_days):
+def create_event(start_d, number_days, summary, description):
     service = get_calendar_service()
     start_d = datetime.strptime(start_d, "%Y-%m-%d %H:%M:%S")
     start = start_d.isoformat()
@@ -81,8 +81,8 @@ def create_event(start_d, number_days):
 
     event_result = service.events().insert(calendarId="primary",
                                            body={
-                                               "summary": "Automating calendar",
-                                               "description": "Create event test",
+                                               "summary": summary,
+                                               "description": description,
                                                "start": {"dateTime": start, "timeZone": "Europe/Paris"},
                                                "end": {"dateTime": end, "timeZone": "Europe/Paris"}
                                            }).execute()
