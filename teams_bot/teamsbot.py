@@ -599,12 +599,17 @@ def handle_cards(api, incoming_msg):
                                           m["inputs"]["onCallDutyChoiceResponse"], m["inputs"]["comment"])
         return "Your answer was : {}".format(m["inputs"]["onCallDutyChoiceResponse"]) + " " + m["inputs"]["comment"]
 
-    # CARD
+    # CARD WITH COMMENT
     elif 'onCallDutyDate' in m["inputs"] and \
             m["inputs"]["onCallDutyDate"] != "" and \
             'commentOnCallDuty' in m["inputs"] and \
             m["inputs"]["commentOnCallDuty"] != "":
-        return "Your answer was3 : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+
+    # CARD WITHOUT COMMENT
+    elif 'onCallDutyDate' in m["inputs"] and \
+         m["inputs"]["onCallDutyDate"] != "":
+        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"])
 
     # CARD
     elif 'comment' in m["inputs"]:
