@@ -1,5 +1,7 @@
-import requests
 import sys
+sys.path.insert(0, '../calendar_dir')
+from calendar_dir import calendar_func as cal
+import requests
 import json
 from teams_bot.check import *
 from webexteamsbot import TeamsBot
@@ -86,6 +88,18 @@ def greeting(incoming_msg):
 
 def do_something(incoming_msg):
     return "I did what u said - {}".format(incoming_msg.text)
+
+
+def list_calendar(incoming_msg):
+    cal_services = cal.list_calendars()
+    r = ""
+    for calendar in cal_services:
+        summary = calendar["summary"]
+        c_id = calendar["id"]
+        primary = "Primary" if calendar.get("primary") else ""
+        r += summary + " " + c_id + " " + primary + "\n\n"
+        print("%s\t%s\t%s" % (summary, c_id, primary))
+    return r
 
 
 def questions(incoming_msg):
@@ -575,7 +589,7 @@ def handle_cards(api, incoming_msg):
         send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
         return "Your answer was : {}".format(m["inputs"]["choice"])
 
-    # CHANGE REQUEST
+    # CHANGE ON CALL DUTY REQUEST
     elif 'sender' in m["inputs"] and 'onCallDutyStartDate' in m["inputs"]:
         if m["inputs"]["onCallDutyStartDate"] == "" or m["inputs"]["onCallDutyEndDate"] == "":
             return "Please enter a date before submitting"
@@ -599,16 +613,16 @@ def handle_cards(api, incoming_msg):
                                           m["inputs"]["onCallDutyChoiceResponse"], m["inputs"]["comment"])
         return "Your answer was : {}".format(m["inputs"]["onCallDutyChoiceResponse"]) + " " + m["inputs"]["comment"]
 
-    # CARD WITH COMMENT
+    # SHOWCARD WITH COMMENT
     elif 'onCallDutyDate' in m["inputs"] and \
             m["inputs"]["onCallDutyDate"] != "" and \
             'commentOnCallDuty' in m["inputs"] and \
             m["inputs"]["commentOnCallDuty"] != "":
         return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
 
-    # CARD WITHOUT COMMENT
+    # SHOWCARD WITHOUT COMMENT
     elif 'onCallDutyDate' in m["inputs"] and \
-         m["inputs"]["onCallDutyDate"] != "":
+            m["inputs"]["onCallDutyDate"] != "":
         return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"])
 
     # CARD
@@ -705,6 +719,7 @@ bot.add_command("/messageroom",
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
 bot.add_command("/changeoncallduty", "Change an on call duty date", on_call_duty_change_request)
+bot.add_command("/listcalendar", "List your calendar_dir", list_calendar)
 
 bot.remove_command("/echo")
 

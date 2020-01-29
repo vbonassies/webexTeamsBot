@@ -8,8 +8,8 @@ __pycache__/
 
 # Files
 teams_bot/data.json
-calendar/credentials.json
-calendar/tests/*
+calendar_dir/credentials.json
+calendar_dir/tests/*
 
 # Distribution / packaging
 .Python

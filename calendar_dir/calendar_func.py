@@ -41,12 +41,7 @@ def list_calendars():
     calendars = calendars_result.get("items", [])
 
     if not calendars:
-        print("No calendars found.")
-    for calendar in calendars:
-        summary = calendar["summary"]
-        c_id = calendar["id"]
-        primary = "Primary" if calendar.get("primary") else ""
-        print("%s\t%s\t%s" % (summary, c_id, primary))
+        print("No calendar found.")
     return calendars
 
 
