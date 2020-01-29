@@ -13,7 +13,10 @@ teams_bot/token.pickle
 calendar_dir/credentials.json
 calendar_dir/token.pickle
 calendar_dir/tests/*
+node_modules/*
 
+# Folders
+node_modules
 
 # Distribution / packaging
 .Python

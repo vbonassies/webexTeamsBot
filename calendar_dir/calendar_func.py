@@ -60,10 +60,6 @@ def list_events():
 
     if not events:
         print("No upcoming events found.")
-    for event in events:
-        start = event["start"].get("dateTime", event["start"].get("date"))
-        print(start, event["summary"])
-        print(event["id"])
     return events
 
 
@@ -71,7 +67,8 @@ def create_event(start_d, number_days, summary, description):
     service = get_calendar_service()
     start_d = datetime.strptime(start_d, "%Y-%m-%d %H:%M:%S")
     start = start_d.isoformat()
-    h = 24 * number_days
+    number_days = int(number_days)
+    h = 24 * number_days - 24
     end = (start_d + timedelta(hours=h)).isoformat()
 
     event_result = service.events().insert(calendarId="primary",

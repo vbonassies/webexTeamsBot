@@ -92,15 +92,44 @@ def do_something(incoming_msg):
 
 
 def list_calendar(incoming_msg):
-    cal_services = cal.list_calendars()
+    cal_list = cal.list_calendars()
     r = ""
-    for calendar in cal_services:
+    for calendar in cal_list:
         summary = calendar["summary"]
         c_id = calendar["id"]
         primary = "Primary" if calendar.get("primary") else ""
         r += summary + " " + c_id + " " + primary + "\n\n"
         print("%s\t%s\t%s" % (summary, c_id, primary))
     return r
+
+
+def list_events(incoming_msg):
+    e_list = cal.list_events()
+    r = ""
+    for event in e_list:
+        start = event["start"].get("dateTime", event["start"].get("date"))
+        r += start + " " + event["summary"] + " " + event["id"] + "\n\n"
+        print(start, event["summary"])
+        print(event["id"])
+    return r
+
+
+def create_event(incoming_msg):
+    attachment = card_func.create_event_card()
+    backupmessage = "This and example of an event creation."
+
+    create_message_with_attachment(incoming_msg.roomId,
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
+    return ""
+
+
+def update_event(incoming_msg):
+    return ""
+
+
+def delete_event(incoming_msg):
+    return ""
 
 
 def questions(incoming_msg):
@@ -315,53 +344,78 @@ def handle_cards(api, incoming_msg):
     :return:
     """
     m = get_attachment_actions(incoming_msg["data"]["id"])
+    m_i = m["inputs"]
     # BASIC YES NO
-    if 'sender' in m["inputs"] and 'choice' in m["inputs"]:
-        send_response(m["inputs"]["sender"], m["inputs"]["receiver"], m["inputs"]["choice"])
-        return "Your answer was : {}".format(m["inputs"]["choice"])
+    if 'sender' in m_i and 'choice' in m_i:
+        send_response(m_i["sender"], m_i["receiver"], m_i["choice"])
+        return "Your answer was : {}".format(m_i["choice"])
 
     # CHANGE ON CALL DUTY REQUEST
-    elif 'sender' in m["inputs"] and 'onCallDutyStartDate' in m["inputs"]:
-        if m["inputs"]["onCallDutyStartDate"] == "" or m["inputs"]["onCallDutyEndDate"] == "":
+    elif 'sender' in m_i and 'onCallDutyStartDate' in m_i:
+        if m_i["onCallDutyStartDate"] == "" or m_i["onCallDutyEndDate"] == "":
             return "Please enter a date before submitting"
-        if m["inputs"]["receiver"] == "":
+        if m_i["receiver"] == "":
             return "Please enter an email before submitting"
-        s_date = str_to_date(m["inputs"]["onCallDutyStartDate"])
-        e_date = str_to_date(m["inputs"]["onCallDutyEndDate"])
+        s_date = str_to_date(m_i["onCallDutyStartDate"])
+        e_date = str_to_date(m_i["onCallDutyEndDate"])
         if not check_date_with_today(s_date):
             return "The starting date cannot be prior to or be today"
         if not check_two_dates(s_date, e_date):
             return "The on call duty end date must be later than the start date"
-        send_request_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
+        send_request_change_on_call_duty(m_i["sender"], m_i["receiver"],
                                          s_date, e_date,
-                                         m["inputs"]["comment"])
+                                         m_i["comment"])
         return "Your request is : {}".format(s_date) + " " \
-               + e_date + "  " + m["inputs"]["comment"]
+               + e_date + "  " + m_i["comment"]
 
     # CHANGE REQUEST RESPONSE
-    elif 'onCallDutyChoiceResponse' in m["inputs"]:
-        send_response_change_on_call_duty(m["inputs"]["sender"], m["inputs"]["receiver"],
-                                          m["inputs"]["onCallDutyChoiceResponse"], m["inputs"]["comment"])
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyChoiceResponse"]) + " " + m["inputs"]["comment"]
+    elif 'onCallDutyChoiceResponse' in m_i:
+        send_response_change_on_call_duty(m_i["sender"], m_i["receiver"],
+                                          m_i["onCallDutyChoiceResponse"], m_i["comment"])
+        return "Your answer was : {}".format(m_i["onCallDutyChoiceResponse"]) + " " + m_i["comment"]
 
     # SHOWCARD WITH COMMENT
-    elif 'onCallDutyDate' in m["inputs"] and \
-            m["inputs"]["onCallDutyDate"] != "" and \
-            'commentOnCallDuty' in m["inputs"] and \
-            m["inputs"]["commentOnCallDuty"] != "":
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"]) + ", " + m["inputs"]["commentOnCallDuty"]
+    elif 'onCallDutyDate' in m_i and \
+            m_i["onCallDutyDate"] != "" and \
+            'commentOnCallDuty' in m_i and \
+            m_i["commentOnCallDuty"] != "":
+        return "Your answer was : {}".format(m_i["onCallDutyDate"]) + ", " + m_i["commentOnCallDuty"]
 
     # SHOWCARD WITHOUT COMMENT
-    elif 'onCallDutyDate' in m["inputs"] and \
-            m["inputs"]["onCallDutyDate"] != "":
-        return "Your answer was : {}".format(m["inputs"]["onCallDutyDate"])
+    elif 'onCallDutyDate' in m_i and \
+            m_i["onCallDutyDate"] != "":
+        return "Your answer was : {}".format(m_i["onCallDutyDate"])
 
     # CARD
-    elif 'comment' in m["inputs"]:
-        return "Your answer was : {}".format(m["inputs"]["comment"])
+    elif 'comment' in m_i:
+        return "Your answer was : {}".format(m_i["comment"])
+
     # CARD LIST
-    elif 'priority' in m["inputs"]:
-        return "Your answer was : {}".format(m["inputs"]["priority"])
+    elif 'priority' in m_i:
+        return "Your answer was : {}".format(m_i["priority"])
+
+    # CREATE EVENT CARD
+    elif 's_date' in m_i:
+        if m_i["summary"] == "":
+            return "Please fill out the summary"
+        elif m_i["description"] == "":
+            return "Please fill out the description"
+        elif m_i["s_date"] == "":
+            return "Please enter a start date for the event"
+        elif m_i["n_days"] == "":
+            return "Please enter a number of days for this event"
+        elif m_i["s_time"] == "":
+            return "Please enter a starting time"
+        d = m_i["s_date"] + " " + m_i["s_time"] + ":00"
+        # d = convert_date_for_event(d)
+        print(d)
+        # 2020-01-30 08:00:00
+        cal.create_event(d,
+                         m_i["n_days"],
+                         m_i["summary"],
+                         m_i["description"])
+        return "Event created with: " + m_i["s_date"] + ", " + m_i["n_days"] + ", " + m_i["summary"] + ", " \
+               + m_i["description"]
 
     return "Something went wrong"
 
@@ -451,6 +505,8 @@ bot.add_command("/searchroom", "Search for the two most recent active room", sea
 bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
 bot.add_command("/changeoncallduty", "Change an on call duty date", on_call_duty_change_request)
 bot.add_command("/listcalendar", "List your calendars", list_calendar)
+bot.add_command("/listevents", "List your events of your calendar", list_events)
+bot.add_command("/createevent", "Create an event on your calendar", create_event)
 
 bot.remove_command("/echo")
 

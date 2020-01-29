@@ -225,7 +225,7 @@ def show_card_card():
                             {
                                 "type": "Input.Text",
                                 "id": "comment",
-                                "isMultipleline": true,
+                                "isMultiline": true,
                                 "placeholder": "Enter your comment"
                             }
                         ],
@@ -292,3 +292,93 @@ def show_list_card_card():
     '''
     return c
 
+
+def create_event_card():
+    c = '''
+    {
+        "contentType": "application/vnd.microsoft.card.adaptive",
+        "content": {
+            "type": "AdaptiveCard",
+            "body": [{
+                "type": "Container",
+                "items": [{
+                    "type": "TextBlock",
+                    "text": "Create an event on your calendar."
+                }]
+            }],
+            "actions": [
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Please fill out this form to create an event",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                             {
+                                "type": "TextBlock",
+                                "text": "Start date: "
+                            },
+                            {
+                                "type": "Input.Date",
+                                "id": "s_date"
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "Start Time: "
+                            },
+                            {
+                                "type": "Input.Time",
+                                "id": "s_time",
+                                "value": "08:00"
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "Number of days: "
+                            },
+                            {
+                                "type": "Input.Number",
+                                "id": "n_days",
+                                "min": 1,
+                                "max": 14,
+                                "value": 7
+                            },
+                             {
+                                "type": "TextBlock",
+                                "text": "Summary: "
+                            },
+                            {
+                                "type": "Input.Text",
+                                "id": "summary",
+                                "isMultiline": true,
+                                "placeholder": "Summary.."
+                                
+                            },
+                             {
+                                "type": "TextBlock",
+                                "text": "Description: "
+                            },
+                            {
+                                "type": "Input.Text",
+                                "id": "description",
+                                "placeholder": "Add a description",
+                                "isMultiline": true
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "OK",
+                                "data": {
+                                    
+                                }
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                    }                
+                }
+            ],
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.0"
+        }
+    }
+    '''
+    return c

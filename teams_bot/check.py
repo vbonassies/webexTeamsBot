@@ -23,6 +23,12 @@ def str_to_date(str_date):
     return str_date
 
 
+def convert_date_for_event(str_date):
+    str_date = datetime.strptime(str_date, "%Y-%m-%d %H:%M:%S")
+    str_date = str_date.isoformat()
+    return str(str_date)
+
+
 def date_to_str(d):
     return str(d.strftime("%d-%m-%Y"))
 
