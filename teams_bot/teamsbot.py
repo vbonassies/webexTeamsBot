@@ -7,6 +7,7 @@ from teams_bot.check import *
 from webexteamsbot import TeamsBot
 from webexteamsbot.models import Response
 from difflib import SequenceMatcher
+import cards as card_func
 
 with open("data.json", "r") as f:
     my_dict = json.load(f)
@@ -195,49 +196,7 @@ def send_request(incoming_msg):
 
 
 def yes_no(json_data, sender_email, receiver_email):
-    attachment = '''
-        {
-            "contentType": "application/vnd.microsoft.card.adaptive",
-            "content": {
-                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-              "type": "AdaptiveCard",
-              "version": "1.0",
-              "body": [
-                {
-                  "type": "TextBlock",
-                  "text": "Yes or No"
-                },
-                {
-                  "type": "Input.ChoiceSet",
-                  "id": "choice",
-                  "style": "compact",
-                  "isMultiSelect": false,
-                  "value": "1",
-                  "choices": [
-                    {
-                      "title": "Yes",
-                      "value": "Yes"
-                    },
-                    {
-                      "title": "No",
-                      "value": "No"
-                    }
-                  ]
-                }
-              ],
-              "actions": [
-                {
-                  "type": "Action.Submit",
-                  "title": "OK",
-                  "data": {
-                    "sender": "''' + sender_email + '''",
-                    "receiver": "''' + receiver_email + '''"
-                  }
-                }
-              ]
-            }
-        }
-        '''
+    attachment = card_func.yes_no_card(sender_email, receiver_email)
     backupmessage = "This and example of a yes no."
 
     create_message_with_attachment(json_data["roomId"],
@@ -275,56 +234,8 @@ def send_request_change_on_call_duty(sender_email, receiver_email, response_star
 
 
 def on_call_duty_change_response(json_data, sender_email, receiver_email):
-    attachment = '''
-            {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                  "type": "AdaptiveCard",
-                  "version": "1.0",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "text": "Yes or No"
-                    },
-                    {
-                      "type": "Input.ChoiceSet",
-                      "id": "onCallDutyChoiceResponse",
-                      "style": "compact",
-                      "isMultiSelect": false,
-                      "value": "1",
-                      "choices": [
-                        {
-                          "title": "Yes",
-                          "value": "Yes"
-                        },
-                        {
-                          "title": "No",
-                          "value": "No"
-                        }
-                      ]
-                    },
-                    {
-                        "type": "Input.Text",
-                        "id": "comment",
-                        "placeholder": "Add a comment",
-                        "isMultiline": true
-                    }
-                  ],
-                  "actions": [
-                    {
-                      "type": "Action.Submit",
-                      "title": "OK",
-                      "data": {
-                        "sender": "''' + sender_email + '''",
-                        "receiver": "''' + receiver_email + '''"
-                      }
-                    }
-                  ]
-                }
-            }
-            '''
-    backupmessage = "This and example of a yes no."
+    attachment = card_func.on_call_duty_change_response_card(sender_email, receiver_email)
+    backupmessage = "This and example of a call duty change response."
 
     create_message_with_attachment(json_data["roomId"],
                                    msgtxt=backupmessage,
@@ -333,80 +244,7 @@ def on_call_duty_change_response(json_data, sender_email, receiver_email):
 
 
 def on_call_duty_change_request(incoming_msg):
-    attachment = '''
-    {
-        "contentType": "application/vnd.microsoft.card.adaptive",
-        "content": {
-            "type": "AdaptiveCard",
-            "body": [{
-                "type": "Container",
-                "items": [{
-                    "type": "TextBlock",
-                    "text": "On Call duty change request."
-                }]
-            }],
-            "actions": [
-                {
-                    "type": "Action.ShowCard",
-                    "title": "Please fill this form to request your on call duty change",
-                    "card": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                             {
-                                "type": "TextBlock",
-                                "text": "Receiver email: "
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "receiver",
-                                "placeholder": "Email of the receiver",
-                                "isMultiline": true
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Start Date: "
-                            },
-                            {
-                                "type": "Input.Date",
-                                "id": "onCallDutyStartDate"
-                            },
-                             {
-                                "type": "TextBlock",
-                                "text": "End Date: "
-                            },
-                            {
-                                "type": "Input.Date",
-                                "id": "onCallDutyEndDate"
-                            },
-                             {
-                                "type": "TextBlock",
-                                "text": "Comment (optional): "
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "comment",
-                                "placeholder": "Add a comment",
-                                "isMultiline": true
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "OK",
-                                "data": {
-                                    "sender": "''' + incoming_msg.personId + '''"
-                                }
-                            }
-                        ],
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
-                    }                
-                }
-            ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.0"
-        }
-    }
-    '''
+    attachment = card_func.on_call_duty_change_request_card(incoming_msg)
     backupmessage = "On call duty change request example."
 
     create_message_with_attachment(incoming_msg.roomId,
@@ -416,72 +254,7 @@ def on_call_duty_change_request(incoming_msg):
 
 
 def show_card(incoming_msg):
-    attachment = '''
-    {
-        "contentType": "application/vnd.microsoft.card.adaptive",
-        "content": {
-            "type": "AdaptiveCard",
-            "body": [{
-                "type": "Container",
-                "items": [{
-                    "type": "TextBlock",
-                    "text": "This is a sample of the adaptive card system."
-                }]
-            }],
-            "actions": [
-                {
-                    "type": "Action.ShowCard",
-                    "title": "Set On-Call duty date",
-                    "card": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                            {
-                                "type": "Input.Date",
-                                "id": "onCallDutyDate"
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "commentOnCallDuty",
-                                "placeholder": "Add a comment",
-                                "isMultiline": true
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "OK"
-                            }
-                        ],
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
-                    }                
-                },
-                {
-                    "type": "Action.ShowCard",
-                    "title": "Comment",
-                    "card": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                            {
-                                "type": "Input.Text",
-                                "id": "comment",
-                                "isMultipleline": true,
-                                "placeholder": "Enter your comment"
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "OK"
-                            }
-                        ]
-                    }
-                }
-            ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.0"
-        }
-    }
-    '''
+    attachment = card_func.show_card_card()
     backupmessage = "This is an example using Adaptive Cards."
 
     create_message_with_attachment(incoming_msg.roomId,
@@ -491,49 +264,7 @@ def show_card(incoming_msg):
 
 
 def show_list_card(incoming_msg):
-    attachment = '''
-    {
-        "contentType": "application/vnd.microsoft.card.adaptive",
-        "content": {
-                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-          "type": "AdaptiveCard",
-          "version": "1.0",
-          "body": [
-            {
-              "type": "TextBlock",
-              "text": "Pick the priority"
-            },
-            {
-              "type": "Input.ChoiceSet",
-              "id": "priority",
-              "style": "compact",
-              "isMultiSelect": false,
-              "value": "1",
-              "choices": [
-                {
-                  "title": "Low",
-                  "value": "1"
-                },
-                {
-                  "title": "Medium",
-                  "value": "2"
-                },
-                {
-                  "title": "High",
-                  "value": "3"
-                }
-              ]
-            }
-          ],
-          "actions": [
-            {
-              "type": "Action.Submit",
-              "title": "OK"
-            }
-          ]
-        }
-    }
-    '''
+    attachment = card_func.show_list_card_card()
     backupmessage = "This is an example using Adaptive Cards and InputChoice."
 
     create_message_with_attachment(incoming_msg.roomId,
@@ -719,7 +450,7 @@ bot.add_command("/messageroom",
 bot.add_command("/searchroom", "Search for the two most recent active room", search_room)
 bot.add_command("/sendrequest", "Send a Yes or No card to a user, Example: **/sendrequest bob@bob.com**", send_request)
 bot.add_command("/changeoncallduty", "Change an on call duty date", on_call_duty_change_request)
-bot.add_command("/listcalendar", "List your calendar_dir", list_calendar)
+bot.add_command("/listcalendar", "List your calendars", list_calendar)
 
 bot.remove_command("/echo")
 
