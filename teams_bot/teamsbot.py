@@ -108,7 +108,7 @@ def list_events(incoming_msg):
     r = ""
     for event in e_list:
         start = event["start"].get("dateTime", event["start"].get("date"))
-        r += start + " " + event["summary"] + " " + event["id"] + "\n\n"
+        r += event["summary"] + " | " + start + "\n\n"
         print(start, event["summary"])
         print(event["id"])
     return r
