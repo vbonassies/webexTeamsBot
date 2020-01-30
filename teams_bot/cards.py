@@ -368,7 +368,7 @@ def create_event_card():
                         "actions": [
                             {
                                 "type": "Action.Submit",
-                                "title": "OK",
+                                "title": "CREATE",
                                 "data": {
                                     
                                 }
@@ -479,7 +479,50 @@ def update_event_card(e):
           "actions": [
             {
               "type": "Action.Submit",
-              "title": "OK"
+              "title": "UPDATE"
+            }
+          ]
+        }
+    }
+    '''
+    return c
+
+
+def delete_event_card(e):
+    a = ""
+    for i in e:
+        a += '''{
+                  "title": "''' + i["summary"] + '''",
+                  "value": "''' + i["id"] + '''"
+                },'''
+    a = a[:-1]
+    c = '''
+    {
+        "contentType": "application/vnd.microsoft.card.adaptive",
+        "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+          "type": "AdaptiveCard",
+          "version": "1.0",
+          "body": [
+            {
+              "type": "TextBlock",
+              "text": "Choose the event you want to delete"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "id": "e_id_del",
+              "style": "compact",
+              "isMultiSelect": false,
+              "value": "1",
+              "choices": [
+                ''' + a + '''
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": "Action.Submit",
+              "title": "DELETE"
             }
           ]
         }

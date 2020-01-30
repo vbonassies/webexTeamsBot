@@ -132,7 +132,7 @@ def create_event(incoming_msg):
 def update_event(incoming_msg):
     e = list_event_summary_id()
     attachment = card_func.update_event_card(e)
-    backupmessage = "This and example of an update creation."
+    backupmessage = "This and example of an event update."
 
     create_message_with_attachment(incoming_msg.roomId,
                                    msgtxt=backupmessage,
@@ -141,6 +141,13 @@ def update_event(incoming_msg):
 
 
 def delete_event(incoming_msg):
+    e = list_event_summary_id()
+    attachment = card_func.delete_event_card(e)
+    backupmessage = "This and example of an event deletion."
+
+    create_message_with_attachment(incoming_msg.roomId,
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
     return ""
 
 
@@ -433,6 +440,11 @@ def handle_cards(api, incoming_msg):
         cal.update_event(m_i["e_id"], m_i["summary"], m_i["description"], s, e)
         return "Event updated"
 
+    # DELETE EVENT CARD
+    elif 'e_id_del' in m_i:
+        cal.delete_event(m_i["e_id_del"])
+        return "Event deleted"
+
     return "Something went wrong"
 
 
@@ -524,6 +536,7 @@ bot.add_command("/listcalendar", "List your calendars", list_calendar)
 bot.add_command("/listevents", "List your events of your calendar", list_events)
 bot.add_command("/createevent", "Create an event on your calendar", create_event)
 bot.add_command("/updateevent", "Update an event on your calendar", update_event)
+bot.add_command("/deleteevent", "Delete an event on your calendar", delete_event)
 
 bot.remove_command("/echo")
 
