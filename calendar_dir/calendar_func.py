@@ -48,7 +48,6 @@ def list_calendars():
 def list_events():
     service = get_calendar_service()
     now = datetime.utcnow().isoformat() + "Z"
-    print("Getting List of 10 events")
     events_result = service.events().list(
         calendarId="primary",
         timeMin=now,

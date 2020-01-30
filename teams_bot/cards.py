@@ -328,6 +328,8 @@ def create_event_card():
                             {
                                 "type": "Input.Time",
                                 "id": "s_time",
+                                "min": "00:00",
+                                "max": "23:59",
                                 "value": "08:00"
                             },
                             {
@@ -378,6 +380,108 @@ def create_event_card():
             ],
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "version": "1.0"
+        }
+    }
+    '''
+    return c
+
+
+def update_event_card(e):
+    a = ""
+    for i in e:
+        a += '''{
+                  "title": "''' + i["summary"] + '''",
+                  "value": "''' + i["id"] + '''"
+                },'''
+    a = a[:-1]
+    c = '''
+    {
+        "contentType": "application/vnd.microsoft.card.adaptive",
+        "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+          "type": "AdaptiveCard",
+          "version": "1.0",
+          "body": [
+            {
+              "type": "TextBlock",
+              "text": "Choose the event you want to update"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "id": "e_id",
+              "style": "compact",
+              "isMultiSelect": false,
+              "value": "1",
+              "choices": [
+                ''' + a + '''
+              ]
+            },
+            {
+                "type": "TextBlock",
+                "text": "Start date: "
+            },
+            {
+                "type": "Input.Date",
+                "id": "n_start_date"
+            },
+            {
+                "type": "TextBlock",
+                "text": "Start time: "
+            },
+            {
+                "type": "Input.Time",
+                "id": "n_start_time",
+                "min": "00:00",
+                "max": "23:59",
+                "value": "08:00"
+            },
+            {
+                "type": "TextBlock",
+                "text": "End date: "
+            },
+            {
+                "type": "Input.Date",
+                "id": "n_end_date"
+            },
+            {
+                "type": "TextBlock",
+                "text": "End time: "
+            },
+            {
+                "type": "Input.Time",
+                "id": "n_end_time",
+                "min": "00:00",
+                "max": "23:59",
+                "value": "08:00"
+            },
+             {
+                "type": "TextBlock",
+                "text": "Summary: "
+            },
+            {
+                "type": "Input.Text",
+                "id": "summary",
+                "isMultiline": true,
+                "placeholder": "Summary.."
+                
+            },
+             {
+                "type": "TextBlock",
+                "text": "Description: "
+            },
+            {
+                "type": "Input.Text",
+                "id": "description",
+                "placeholder": "Add a description",
+                "isMultiline": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "Action.Submit",
+              "title": "OK"
+            }
+          ]
         }
     }
     '''

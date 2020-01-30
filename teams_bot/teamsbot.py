@@ -114,6 +114,11 @@ def list_events(incoming_msg):
     return r
 
 
+def list_event_summary_id():
+    e_list = cal.list_events()
+    return e_list
+
+
 def create_event(incoming_msg):
     attachment = card_func.create_event_card()
     backupmessage = "This and example of an event creation."
@@ -125,6 +130,13 @@ def create_event(incoming_msg):
 
 
 def update_event(incoming_msg):
+    e = list_event_summary_id()
+    attachment = card_func.update_event_card(e)
+    backupmessage = "This and example of an update creation."
+
+    create_message_with_attachment(incoming_msg.roomId,
+                                   msgtxt=backupmessage,
+                                   attachment=json.loads(attachment))
     return ""
 
 
@@ -407,15 +419,19 @@ def handle_cards(api, incoming_msg):
         elif m_i["s_time"] == "":
             return "Please enter a starting time"
         d = m_i["s_date"] + " " + m_i["s_time"] + ":00"
-        # d = convert_date_for_event(d)
-        print(d)
-        # 2020-01-30 08:00:00
         cal.create_event(d,
                          m_i["n_days"],
                          m_i["summary"],
                          m_i["description"])
         return "Event created with: " + m_i["s_date"] + ", " + m_i["n_days"] + ", " + m_i["summary"] + ", " \
                + m_i["description"]
+
+    # UPDATE EVENT CARD
+    elif 'n_start_time' in m_i:
+        s = m_i["n_start_date"] + " " + m_i["n_start_time"] + ":00"
+        e = m_i["n_end_date"] + " " + m_i["n_end_time"] + ":00"
+        cal.update_event(m_i["e_id"], m_i["summary"], m_i["description"], s, e)
+        return "Event updated"
 
     return "Something went wrong"
 
@@ -507,6 +523,7 @@ bot.add_command("/changeoncallduty", "Change an on call duty date", on_call_duty
 bot.add_command("/listcalendar", "List your calendars", list_calendar)
 bot.add_command("/listevents", "List your events of your calendar", list_events)
 bot.add_command("/createevent", "Create an event on your calendar", create_event)
+bot.add_command("/updateevent", "Update an event on your calendar", update_event)
 
 bot.remove_command("/echo")
 
