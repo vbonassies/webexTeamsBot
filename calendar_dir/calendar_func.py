@@ -47,16 +47,15 @@ def list_calendars():
 
 def list_events():
     service = get_calendar_service()
-    now = datetime.utcnow().isoformat() + "Z"
+    now = datetime.today().isoformat() + 'Z'
     events_result = service.events().list(
-        calendarId="primary",
+        calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
         timeMin=now,
         maxResults=10,
         singleEvents=True,
         orderBy="startTime"
     ).execute()
     events = events_result.get("items", [])
-
     if not events:
         print("No upcoming events found.")
     return events
@@ -70,7 +69,7 @@ def create_event(start_d, number_days, summary, description):
     h = 24 * number_days - 24
     end = (start_d + timedelta(hours=h)).isoformat()
 
-    event_result = service.events().insert(calendarId="primary",
+    event_result = service.events().insert(calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
                                            body={
                                                "summary": summary,
                                                "description": description,
@@ -89,7 +88,7 @@ def update_event(c_id, summary, desc, s, e):
     end = e.isoformat()
 
     event_result = service.events().update(
-        calendarId="primary",
+        calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
         eventId=c_id,
         body={
             "summary": summary,
@@ -105,7 +104,7 @@ def delete_event(c_id):
     service = get_calendar_service()
     try:
         service.events().delete(
-            calendarId="primary",
+            calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
             eventId=c_id,
         ).execute()
     except googleapiclient.errors.httpError:
