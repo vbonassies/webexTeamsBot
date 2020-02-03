@@ -166,7 +166,8 @@ def get_on_call_duty(incoming_msg):
     if incoming_msg.text == "/oncallduty":
         r = ""
         for event in e_list:
-            r += event["summary"] + " | " + event["description"] + "\n\n"
+            if "summary" in event and "description" in event:
+                r += event["summary"] + " | " + event["description"] + "\n\n"
         return r
 
     domain = incoming_msg.text.split("/oncallduty ", 1)[1]

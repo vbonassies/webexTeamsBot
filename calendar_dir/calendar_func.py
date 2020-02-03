@@ -77,7 +77,6 @@ def today_events():
     events = events_result.get("items", [])
     if not events:
         print("No upcoming events found.")
-    print(events)
     return events
 
 
