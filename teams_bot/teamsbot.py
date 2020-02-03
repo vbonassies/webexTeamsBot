@@ -1,4 +1,5 @@
 import sys
+
 sys.path.insert(0, '../calendar_dir')
 from calendar_dir import calendar_func as cal
 import requests
@@ -119,8 +120,15 @@ def list_event_summary_id():
     return e_list
 
 
+def get_agents():
+    with open("agents.json", "r") as json_file:
+        agents = json.load(json_file)
+    return agents
+
+
 def create_event(incoming_msg):
-    attachment = card_func.create_event_card()
+    e = get_agents()
+    attachment = card_func.create_event_card(e)
     backupmessage = "This and example of an event creation."
 
     create_message_with_attachment(incoming_msg.roomId,
@@ -131,7 +139,8 @@ def create_event(incoming_msg):
 
 def update_event(incoming_msg):
     e = list_event_summary_id()
-    attachment = card_func.update_event_card(e)
+    a = get_agents()
+    attachment = card_func.update_event_card(e, a)
     backupmessage = "This and example of an event update."
 
     create_message_with_attachment(incoming_msg.roomId,
@@ -149,6 +158,22 @@ def delete_event(incoming_msg):
                                    msgtxt=backupmessage,
                                    attachment=json.loads(attachment))
     return ""
+
+
+def get_on_call_duty(incoming_msg):
+    e_list = cal.today_events()
+
+    if incoming_msg.text == "/oncallduty":
+        r = ""
+        for event in e_list:
+            r += event["summary"] + " | " + event["description"] + "\n\n"
+        return r
+
+    domain = incoming_msg.text.split("/oncallduty ", 1)[1]
+    for e in e_list:
+        if domain in e["summary"]:
+            return e["description"]
+    return "On call duty domain not found"
 
 
 def questions(incoming_msg):
@@ -415,29 +440,43 @@ def handle_cards(api, incoming_msg):
 
     # CREATE EVENT CARD
     elif 's_date' in m_i:
-        if m_i["summary"] == "":
-            return "Please fill out the summary"
-        elif m_i["description"] == "":
-            return "Please fill out the description"
-        elif m_i["s_date"] == "":
+        if m_i["s_date"] == "":
             return "Please enter a start date for the event"
         elif m_i["n_days"] == "":
             return "Please enter a number of days for this event"
         elif m_i["s_time"] == "":
             return "Please enter a starting time"
         d = m_i["s_date"] + " " + m_i["s_time"] + ":00"
+        agents = get_agents()
+        desc = ""
+        summ = ""
+        for agent in agents["agents"]:
+            if m_i["agent_sur"] == agent["surname"]:
+                summ = agent["domain"] + " on call duty"
+                desc = "The agent is: " + agent["lastName"] + " " + agent["firstName"] + "<p> His phone is: " \
+                       + agent["phone"] + "<p> His email is " + agent["mail"]
+
         cal.create_event(d,
                          m_i["n_days"],
-                         m_i["summary"],
-                         m_i["description"])
-        return "Event created with: " + m_i["s_date"] + ", " + m_i["n_days"] + ", " + m_i["summary"] + ", " \
-               + m_i["description"]
+                         summ,
+                         desc)
+        return "Event created with: " + m_i["s_date"] + ", " + m_i["n_days"] + ", " + summ + ", " \
+               + desc
 
     # UPDATE EVENT CARD
     elif 'n_start_time' in m_i:
+        agents = get_agents()
+        desc = ""
+        summ = ""
+        for agent in agents["agents"]:
+            if m_i["agent_sur"] == agent["surname"]:
+                summ = agent["domain"] + " on call duty"
+                desc = "The agent is: " + agent["lastName"] + " " + agent["firstName"] + "<p> His phone is: " \
+                       + agent["phone"] + "<p> His email is " + agent["mail"]
+
         s = m_i["n_start_date"] + " " + m_i["n_start_time"] + ":00"
         e = m_i["n_end_date"] + " " + m_i["n_end_time"] + ":00"
-        cal.update_event(m_i["e_id"], m_i["summary"], m_i["description"], s, e)
+        cal.update_event(m_i["e_id"], summ, desc, s, e)
         return "Event updated"
 
     # DELETE EVENT CARD
@@ -537,6 +576,8 @@ bot.add_command("/listevents", "List your events of your calendar", list_events)
 bot.add_command("/createevent", "Create an event on your calendar", create_event)
 bot.add_command("/updateevent", "Update an event on your calendar", update_event)
 bot.add_command("/deleteevent", "Delete an event on your calendar", delete_event)
+bot.add_command("/oncallduty", "Get all of today on call duty or a specific one if you add the domain",
+                get_on_call_duty)
 
 bot.remove_command("/echo")
 

@@ -293,7 +293,14 @@ def show_list_card_card():
     return c
 
 
-def create_event_card():
+def create_event_card(e):
+    a = ""
+    for i in e["agents"]:
+        a += '''{
+                     "title": "''' + i["lastName"] + " " + i["firstName"] + " - " + i["domain"] + '''",
+                     "value": "''' + i["surname"] + '''"
+                   },'''
+    a = a[:-1]
     c = '''
     {
         "contentType": "application/vnd.microsoft.card.adaptive",
@@ -313,7 +320,20 @@ def create_event_card():
                     "card": {
                         "type": "AdaptiveCard",
                         "body": [
-                             {
+                            {
+                              "type": "TextBlock",
+                              "text": "Choose the agent you want to put on this event"
+                            },
+                            {
+                              "type": "Input.ChoiceSet",
+                              "id": "agent_sur",
+                              "style": "compact",
+                              "isMultiSelect": false,
+                              "choices": [
+                                ''' + a + '''
+                              ]
+                            },
+                            {
                                 "type": "TextBlock",
                                 "text": "Start date: "
                             },
@@ -342,27 +362,6 @@ def create_event_card():
                                 "min": 1,
                                 "max": 14,
                                 "value": 7
-                            },
-                             {
-                                "type": "TextBlock",
-                                "text": "Summary: "
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "summary",
-                                "isMultiline": true,
-                                "placeholder": "Summary.."
-                                
-                            },
-                             {
-                                "type": "TextBlock",
-                                "text": "Description: "
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "description",
-                                "placeholder": "Add a description",
-                                "isMultiline": true
                             }
                         ],
                         "actions": [
@@ -386,7 +385,7 @@ def create_event_card():
     return c
 
 
-def update_event_card(e):
+def update_event_card(e, agents):
     a = ""
     for i in e:
         a += '''{
@@ -394,6 +393,15 @@ def update_event_card(e):
                   "value": "''' + i["id"] + '''"
                 },'''
     a = a[:-1]
+
+    b = ""
+    for i in agents["agents"]:
+        b += '''{
+                         "title": "''' + i["lastName"] + " " + i["firstName"] + " - " + i["domain"] + '''",
+                         "value": "''' + i["surname"] + '''"
+                       },'''
+    b = b[:-1]
+
     c = '''
     {
         "contentType": "application/vnd.microsoft.card.adaptive",
@@ -411,9 +419,21 @@ def update_event_card(e):
               "id": "e_id",
               "style": "compact",
               "isMultiSelect": false,
-              "value": "1",
               "choices": [
                 ''' + a + '''
+              ]
+            },
+            {
+              "type": "TextBlock",
+              "text": "Choose the agent you want to put on this event"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "id": "agent_sur",
+              "style": "compact",
+              "isMultiSelect": false,
+              "choices": [
+                ''' + b + '''
               ]
             },
             {
@@ -453,27 +473,6 @@ def update_event_card(e):
                 "min": "00:00",
                 "max": "23:59",
                 "value": "08:00"
-            },
-             {
-                "type": "TextBlock",
-                "text": "Summary: "
-            },
-            {
-                "type": "Input.Text",
-                "id": "summary",
-                "isMultiline": true,
-                "placeholder": "Summary.."
-                
-            },
-             {
-                "type": "TextBlock",
-                "text": "Description: "
-            },
-            {
-                "type": "Input.Text",
-                "id": "description",
-                "placeholder": "Add a description",
-                "isMultiline": true
             }
           ],
           "actions": [

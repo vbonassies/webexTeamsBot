@@ -1,0 +1,28 @@
+{
+  "agents": [
+      {
+        "surname": "vbonassi",
+        "lastName": "bonassies",
+        "firstName": "valentin",
+        "phone": "0101010101",
+        "mail": "valentin.bonassies.bob@bob.com",
+        "domain": "development"
+      },
+      {
+        "surname": "bbob",
+        "lastName": "bob",
+        "firstName": "bob",
+        "phone": "0202020202",
+        "mail": "bob.bob@bob.com",
+        "domain": "bot"
+      },
+      {
+        "surname": "tototiti",
+        "lastName": "toto",
+        "firstName": "titi",
+        "phone": "0303030303",
+        "mail": "toto.titi@toto.com",
+        "domain": "titi"
+      }
+  ]
+}

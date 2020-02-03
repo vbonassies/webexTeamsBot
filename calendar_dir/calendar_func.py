@@ -61,6 +61,25 @@ def list_events():
     return events
 
 
+def today_events():
+    service = get_calendar_service()
+    now = datetime.today().isoformat() + 'Z'
+    tomorrow = datetime.today() + timedelta(days=1)
+    tomorrow = tomorrow.isoformat() + 'Z'
+    events_result = service.events().list(
+        calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
+        timeMin=now,
+        timeMax=tomorrow,
+        maxResults=10,
+        singleEvents=True,
+        orderBy="startTime"
+    ).execute()
+    events = events_result.get("items", [])
+    if not events:
+        print("No upcoming events found.")
+    return events
+
+
 def create_event(start_d, number_days, summary, description):
     service = get_calendar_service()
     start_d = datetime.strptime(start_d, "%Y-%m-%d %H:%M:%S")
