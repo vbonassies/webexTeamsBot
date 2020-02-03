@@ -305,80 +305,60 @@ def create_event_card(e):
     {
         "contentType": "application/vnd.microsoft.card.adaptive",
         "content": {
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "type": "AdaptiveCard",
-            "body": [{
-                "type": "Container",
-                "items": [{
+            "version": "1.0",
+            "body": [
+                {
                     "type": "TextBlock",
-                    "text": "Create an event on your calendar."
-                }]
-            }],
+                    "text": "Choose the agent you want to put on this event"
+                },
+                {
+                    "type": "Input.ChoiceSet",
+                    "id": "agent_sur",
+                    "style": "compact",
+                    "isMultiSelect": false,
+                    "choices": [
+                        ''' + a + '''
+                    ]
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Start date: "
+                },
+                {
+                    "type": "Input.Date",
+                    "id": "s_date"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Start Time: "
+                },
+                {
+                    "type": "Input.Time",
+                    "id": "s_time",
+                    "min": "00:00",
+                    "max": "23:59",
+                    "value": "08:00"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Number of days: "
+                },
+                {
+                    "type": "Input.Number",
+                    "id": "n_days",
+                    "min": 1,
+                    "max": 14,
+                    "value": 7
+                }
+           ],
             "actions": [
                 {
-                    "type": "Action.ShowCard",
-                    "title": "Please fill out this form to create an event",
-                    "card": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                            {
-                              "type": "TextBlock",
-                              "text": "Choose the agent you want to put on this event"
-                            },
-                            {
-                              "type": "Input.ChoiceSet",
-                              "id": "agent_sur",
-                              "style": "compact",
-                              "isMultiSelect": false,
-                              "choices": [
-                                ''' + a + '''
-                              ]
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Start date: "
-                            },
-                            {
-                                "type": "Input.Date",
-                                "id": "s_date"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Start Time: "
-                            },
-                            {
-                                "type": "Input.Time",
-                                "id": "s_time",
-                                "min": "00:00",
-                                "max": "23:59",
-                                "value": "08:00"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Number of days: "
-                            },
-                            {
-                                "type": "Input.Number",
-                                "id": "n_days",
-                                "min": 1,
-                                "max": 14,
-                                "value": 7
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "CREATE",
-                                "data": {
-                                    
-                                }
-                            }
-                        ],
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
-                    }                
+                  "type": "Action.Submit",
+                  "title": "UPDATE"
                 }
-            ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.0"
+            ]
         }
     }
     '''
@@ -406,81 +386,81 @@ def update_event_card(e, agents):
     {
         "contentType": "application/vnd.microsoft.card.adaptive",
         "content": {
-                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-          "type": "AdaptiveCard",
-          "version": "1.0",
-          "body": [
-            {
-              "type": "TextBlock",
-              "text": "Choose the event you want to update"
-            },
-            {
-              "type": "Input.ChoiceSet",
-              "id": "e_id",
-              "style": "compact",
-              "isMultiSelect": false,
-              "choices": [
-                ''' + a + '''
-              ]
-            },
-            {
-              "type": "TextBlock",
-              "text": "Choose the agent you want to put on this event"
-            },
-            {
-              "type": "Input.ChoiceSet",
-              "id": "agent_sur",
-              "style": "compact",
-              "isMultiSelect": false,
-              "choices": [
-                ''' + b + '''
-              ]
-            },
-            {
-                "type": "TextBlock",
-                "text": "Start date: "
-            },
-            {
-                "type": "Input.Date",
-                "id": "n_start_date"
-            },
-            {
-                "type": "TextBlock",
-                "text": "Start time: "
-            },
-            {
-                "type": "Input.Time",
-                "id": "n_start_time",
-                "min": "00:00",
-                "max": "23:59",
-                "value": "08:00"
-            },
-            {
-                "type": "TextBlock",
-                "text": "End date: "
-            },
-            {
-                "type": "Input.Date",
-                "id": "n_end_date"
-            },
-            {
-                "type": "TextBlock",
-                "text": "End time: "
-            },
-            {
-                "type": "Input.Time",
-                "id": "n_end_time",
-                "min": "00:00",
-                "max": "23:59",
-                "value": "08:00"
-            }
-          ],
-          "actions": [
-            {
-              "type": "Action.Submit",
-              "title": "UPDATE"
-            }
-          ]
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "type": "AdaptiveCard",
+            "version": "1.0",
+            "body": [
+                {
+                    "type": "TextBlock",
+                    "text": "Choose the event you want to update"
+                },
+                {
+                    "type": "Input.ChoiceSet",
+                    "id": "e_id",
+                    "style": "compact",
+                    "isMultiSelect": false,
+                    "choices": [
+                        ''' + a + '''
+                    ]
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Choose the agent you want to put on this event"
+                },
+                {
+                    "type": "Input.ChoiceSet",
+                    "id": "agent_sur",
+                    "style": "compact",
+                    "isMultiSelect": false,
+                    "choices": [
+                        ''' + b + '''
+                    ]
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Start date: "
+                },
+                {
+                    "type": "Input.Date",
+                    "id": "n_start_date"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Start time: "
+                },
+                {
+                    "type": "Input.Time",
+                    "id": "n_start_time",
+                    "min": "00:00",
+                    "max": "23:59",
+                    "value": "08:00"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "End date: "
+                },
+                {
+                    "type": "Input.Date",
+                    "id": "n_end_date"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "End time: "
+                },
+                {
+                    "type": "Input.Time",
+                    "id": "n_end_time",
+                    "min": "00:00",
+                    "max": "23:59",
+                    "value": "08:00"
+                }
+            ],
+            "actions": [
+                {
+                    "type": "Action.Submit",
+                    "title": "UPDATE"
+                }
+            ]
         }
     }
     '''
