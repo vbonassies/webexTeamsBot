@@ -64,12 +64,12 @@ def list_events():
 def today_events():
     service = get_calendar_service()
     now = datetime.today().isoformat() + 'Z'
-    tomorrow = datetime.today() + timedelta(days=1)
-    tomorrow = tomorrow.isoformat() + 'Z'
+    later = datetime.today() + timedelta(hours=1)
+    later = later.isoformat() + 'Z'
     events_result = service.events().list(
         calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
         timeMin=now,
-        timeMax=tomorrow,
+        timeMax=later,
         maxResults=10,
         singleEvents=True,
         orderBy="startTime"
@@ -77,6 +77,7 @@ def today_events():
     events = events_result.get("items", [])
     if not events:
         print("No upcoming events found.")
+    print(events)
     return events
 
 
