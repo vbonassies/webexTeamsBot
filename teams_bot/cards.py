@@ -85,7 +85,7 @@ def on_call_duty_change_response_card(sender, receiver, e_id, ns_date, ne_date):
                   "actions": [
                     {
                       "type": "Action.Submit",
-                      "title": "OK",
+                      "title": "SEND",
                       "data": {
                         "sender": "''' + sender + '''",
                         "receiver": "''' + receiver + '''",
@@ -354,7 +354,7 @@ def create_event_card(e):
             "actions": [
                 {
                   "type": "Action.Submit",
-                  "title": "UPDATE"
+                  "title": "CREATE"
                 }
             ]
         }
