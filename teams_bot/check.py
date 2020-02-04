@@ -29,6 +29,12 @@ def convert_date_for_event(str_date):
     return str(str_date)
 
 
+def change_date_format(str_date):
+    str_date = datetime.strptime(str_date, "%d-%m-%Y  %H:%M:%S")
+    str_date = str_date.strftime("%Y-%m-%d  %H:%M:%S")
+    return str(str_date)
+
+
 def date_to_str(d):
     return str(d.strftime("%d-%m-%Y"))
 

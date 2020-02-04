@@ -80,6 +80,16 @@ def today_events():
     return events
 
 
+def my_events(u_email):
+    events = list_events()
+    myevents = []
+    for event in events:
+        if u_email in event["description"]:
+            myevents.append(event.copy())
+
+    return myevents
+
+
 def create_event(start_d, number_days, summary, description):
     service = get_calendar_service()
     start_d = datetime.strptime(start_d, "%Y-%m-%d %H:%M:%S")
@@ -98,7 +108,7 @@ def create_event(start_d, number_days, summary, description):
     return event_result
 
 
-def update_event(c_id, summary, desc, s, e):
+def update_event(e_id, summary, desc, s, e):
     service = get_calendar_service()
 
     s = datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
@@ -108,7 +118,7 @@ def update_event(c_id, summary, desc, s, e):
 
     event_result = service.events().update(
         calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
-        eventId=c_id,
+        eventId=e_id,
         body={
             "summary": summary,
             "description": desc,
@@ -129,3 +139,10 @@ def delete_event(c_id):
     except googleapiclient.errors.httpError:
         return "Failed to delete event"
     return "Event deleted"
+
+
+def get_event_from_summary(summary):
+    events = list_events()
+    for event in events:
+        if event["summary"] == summary:
+            return event

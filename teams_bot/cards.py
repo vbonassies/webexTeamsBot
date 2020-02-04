@@ -45,7 +45,7 @@ def yes_no_card(sender, receiver):
     return c
 
 
-def on_call_duty_change_response_card(sender, receiver):
+def on_call_duty_change_response_card(sender, receiver, e_id, ns_date, ne_date):
     c = '''
             {
                 "contentType": "application/vnd.microsoft.card.adaptive",
@@ -88,7 +88,10 @@ def on_call_duty_change_response_card(sender, receiver):
                       "title": "OK",
                       "data": {
                         "sender": "''' + sender + '''",
-                        "receiver": "''' + receiver + '''"
+                        "receiver": "''' + receiver + '''",
+                        "e_id": "''' + e_id + '''",
+                        "ns_date": "''' + ns_date + '''",
+                        "ne_date": "''' + ne_date + '''"
                       }
                     }
                   ]
@@ -98,78 +101,73 @@ def on_call_duty_change_response_card(sender, receiver):
     return c
 
 
-def on_call_duty_change_request_card(incoming_msg):
+def on_call_duty_change_request_card(events, incoming_msg):
+    a = ""
+    for i in events:
+        a += '''{
+                    "title": "''' + i["summary"] + '''",
+                    "value": "''' + i["summary"] + '''"
+                },'''
+    a = a[:-1]
+
     c = '''
     {
         "contentType": "application/vnd.microsoft.card.adaptive",
         "content": {
+           "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "type": "AdaptiveCard",
-            "body": [{
-                "type": "Container",
-                "items": [{
-                    "type": "TextBlock",
-                    "text": "On Call duty change request."
-                }]
-            }],
-            "actions": [
+            "version": "1.0",
+            "body": [
                 {
-                    "type": "Action.ShowCard",
-                    "title": "Please fill this form to request your on call duty change",
-                    "card": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                             {
-                                "type": "TextBlock",
-                                "text": "Receiver email: "
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "receiver",
-                                "placeholder": "Email of the receiver",
-                                "isMultiline": true
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": "Start Date: "
-                            },
-                            {
-                                "type": "Input.Date",
-                                "id": "onCallDutyStartDate"
-                            },
-                             {
-                                "type": "TextBlock",
-                                "text": "End Date: "
-                            },
-                            {
-                                "type": "Input.Date",
-                                "id": "onCallDutyEndDate"
-                            },
-                             {
-                                "type": "TextBlock",
-                                "text": "Comment (optional): "
-                            },
-                            {
-                                "type": "Input.Text",
-                                "id": "comment",
-                                "placeholder": "Add a comment",
-                                "isMultiline": true
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "OK",
-                                "data": {
-                                    "sender": "''' + incoming_msg.personId + '''"
-                                }
-                            }
-                        ],
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
-                    }                
+                    "type": "TextBlock",
+                    "text": "Choose the event you want to update"
+                },
+                {
+                    "type": "Input.ChoiceSet",
+                    "id": "e_id",
+                    "style": "compact",
+                    "isMultiSelect": false,
+                    "choices": [
+                        ''' + a + '''
+                    ]
+                },
+                
+                {
+                    "type": "TextBlock",
+                    "text": "Start Date: "
+                },
+                {
+                    "type": "Input.Date",
+                    "id": "onCallDutyStartDate"
+                },
+                 {
+                    "type": "TextBlock",
+                    "text": "End Date: "
+                },
+                {
+                    "type": "Input.Date",
+                    "id": "onCallDutyEndDate"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Comment (optional): "
+                },
+                {
+                    "type": "Input.Text",
+                    "id": "comment",
+                    "placeholder": "Add a comment",
+                    "isMultiline": true
                 }
             ],
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.0"
+            "actions": [
+                {
+                    "type": "Action.Submit",
+                    "title": "REQUEST",
+                    "data": {
+                        "sender": "''' + incoming_msg.personId + '''"
+                    }
+                }
+            ]
         }
     }
     '''

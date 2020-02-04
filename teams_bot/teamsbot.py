@@ -126,6 +126,12 @@ def get_agents():
     return agents
 
 
+def get_managers():
+    with open("agents.json", "r") as json_file:
+        managers = json.load(json_file)
+    return managers["managers"]
+
+
 def create_event(incoming_msg):
     e = get_agents()
     attachment = card_func.create_event_card(e)
@@ -290,25 +296,25 @@ def quickmaths(incoming_msg):
     return str(eval(incoming_msg.text.split("/quickmaths", 1)[1]))
 
 
-def send_request_change_on_call_duty(sender_email, receiver_email, response_start_date, response_end_date,
+def send_request_change_on_call_duty(sender_email, receiver_email, e_id, response_start_date, response_end_date,
                                      response_comment):
     if response_comment == "":
-        text = get_display_name(sender_email) + " would like to change the on call duty from the " \
+        text = get_display_name(sender_email) + " would like to change " + e_id + " from the " \
                + response_start_date + " to the " + response_end_date
     else:
-        text = get_display_name(sender_email) + " would like to change the on call duty from the " \
+        text = get_display_name(sender_email) + " would like to change " + e_id + " from the " \
                + response_start_date + " to the " + response_end_date + " and added the comment: " + response_comment
     body = {
         "toPersonEmail": receiver_email,
         "text": text
     }
     json_data = json.loads(requests.post(url=api_message_room_url, json=body, headers=httpHeaders).text)
-    on_call_duty_change_response(json_data, sender_email, receiver_email)
+    on_call_duty_change_response(json_data, sender_email, receiver_email, e_id, response_start_date, response_end_date)
     return "request sent"
 
 
-def on_call_duty_change_response(json_data, sender_email, receiver_email):
-    attachment = card_func.on_call_duty_change_response_card(sender_email, receiver_email)
+def on_call_duty_change_response(json_data, sender_email, receiver_email, e_id, s_date, e_date):
+    attachment = card_func.on_call_duty_change_response_card(sender_email, receiver_email, e_id, s_date, e_date)
     backupmessage = "This and example of a call duty change response."
 
     create_message_with_attachment(json_data["roomId"],
@@ -318,7 +324,10 @@ def on_call_duty_change_response(json_data, sender_email, receiver_email):
 
 
 def on_call_duty_change_request(incoming_msg):
-    attachment = card_func.on_call_duty_change_request_card(incoming_msg)
+    myevents = cal.my_events(get_email_from_id(incoming_msg.personId))
+    if myevents == "":
+        return "You don't have any future events"
+    attachment = card_func.on_call_duty_change_request_card(myevents, incoming_msg)
     backupmessage = "On call duty change request example."
 
     create_message_with_attachment(incoming_msg.roomId,
@@ -399,15 +408,20 @@ def handle_cards(api, incoming_msg):
     elif 'sender' in m_i and 'onCallDutyStartDate' in m_i:
         if m_i["onCallDutyStartDate"] == "" or m_i["onCallDutyEndDate"] == "":
             return "Please enter a date before submitting"
-        if m_i["receiver"] == "":
-            return "Please enter an email before submitting"
         s_date = str_to_date(m_i["onCallDutyStartDate"])
         e_date = str_to_date(m_i["onCallDutyEndDate"])
         if not check_date_with_today(s_date):
             return "The starting date cannot be prior to or be today"
         if not check_two_dates(s_date, e_date):
             return "The on call duty end date must be later than the start date"
-        send_request_change_on_call_duty(m_i["sender"], m_i["receiver"],
+        managers = get_managers()
+        event = cal.get_event_from_summary(m_i["e_id"])
+        print(event["summary"])
+        for manager in managers:
+            if manager["domain"] in event["summary"]:
+                m = manager
+                print(m)
+        send_request_change_on_call_duty(m_i["sender"], m["mail"], m_i["e_id"],
                                          s_date, e_date,
                                          m_i["comment"])
         return "Your request is : {}".format(s_date) + " " \
@@ -415,6 +429,13 @@ def handle_cards(api, incoming_msg):
 
     # CHANGE REQUEST RESPONSE
     elif 'onCallDutyChoiceResponse' in m_i:
+        if m_i["onCallDutyChoiceResponse"] == "Yes":
+            event = cal.get_event_from_summary(m_i["e_id"])
+            s_d = m_i["ns_date"] + " " + "08:00:00"
+            e_d = m_i["ne_date"] + " " + "08:00:00"
+            s_d = change_date_format(s_d)
+            e_d = change_date_format(e_d)
+            cal.update_event(event["id"], event["summary"], event["description"], s_d, e_d)
         send_response_change_on_call_duty(m_i["sender"], m_i["receiver"],
                                           m_i["onCallDutyChoiceResponse"], m_i["comment"])
         return "Your answer was : {}".format(m_i["onCallDutyChoiceResponse"]) + " " + m_i["comment"]
@@ -453,7 +474,7 @@ def handle_cards(api, incoming_msg):
         summ = ""
         for agent in agents["agents"]:
             if m_i["agent_sur"] == agent["surname"]:
-                summ = agent["domain"] + " on call duty"
+                summ = agent["domain"] + " on call duty starting the " + m_i["s_date"]
                 desc = "The agent is: " + agent["lastName"] + " " + agent["firstName"] + "<p> His phone is: " \
                        + agent["phone"] + "<p> His email is " + agent["mail"]
 
@@ -471,7 +492,7 @@ def handle_cards(api, incoming_msg):
         summ = ""
         for agent in agents["agents"]:
             if m_i["agent_sur"] == agent["surname"]:
-                summ = agent["domain"] + " on call duty"
+                summ = agent["domain"] + " on call duty starting the " + m_i["n_start_date"]
                 desc = "The agent is: " + agent["lastName"] + " " + agent["firstName"] + "<p> His phone is: " \
                        + agent["phone"] + "<p> His email is " + agent["mail"]
 

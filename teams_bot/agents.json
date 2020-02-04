@@ -24,5 +24,23 @@
         "mail": "toto.titi@toto.com",
         "domain": "titi"
       }
+  ],
+  "managers": [
+      {
+        "surname": "vbonassi",
+        "lastName": "bonassies",
+        "firstName": "valentin",
+        "phone": "0101010101",
+        "mail": "valentin.bonassies@gmail.com",
+        "domain": "development"
+      },
+      {
+        "surname": "v2",
+        "lastName": "b2",
+        "firstName": "v",
+        "phone": "0202020202",
+        "mail": "valentin.bonassies+2@gmail.com",
+        "domain": "bot"
+      }
   ]
 }
