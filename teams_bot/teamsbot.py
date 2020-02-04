@@ -416,11 +416,9 @@ def handle_cards(api, incoming_msg):
             return "The on call duty end date must be later than the start date"
         managers = get_managers()
         event = cal.get_event_from_summary(m_i["e_id"])
-        print(event["summary"])
         for manager in managers:
             if manager["domain"] in event["summary"]:
                 m = manager
-                print(m)
         send_request_change_on_call_duty(m_i["sender"], m["mail"], m_i["e_id"],
                                          s_date, e_date,
                                          m_i["comment"])

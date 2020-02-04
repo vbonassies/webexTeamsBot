@@ -51,7 +51,6 @@ def list_events():
     events_result = service.events().list(
         calendarId="9id9jtd88ckj81tq8blkshblts@group.calendar.google.com",
         timeMin=now,
-        maxResults=10,
         singleEvents=True,
         orderBy="startTime"
     ).execute()
@@ -84,7 +83,10 @@ def my_events(u_email):
     events = list_events()
     myevents = []
     for event in events:
+        print(event["summary"])
+        print("-------------------")
         if u_email in event["description"]:
+            print(event)
             myevents.append(event.copy())
 
     return myevents
